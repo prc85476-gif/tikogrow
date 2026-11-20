@@ -70,10 +70,24 @@ export function initBot() {
           }
         }
 
-        const welcomeText = `✈️ *Welcome to Aviator!*\n\nFly high, cash out before the crash, and multiply your USDT instantly!`;
+        const welcomeText = `
+👋 *Welcome to Tiko Grow!*
+
+Earn real USDT & FN coins by completing quick social tasks, watching video ads, and referring friends.
+
+💰 *Tasks:* Earn USDT & FN coins per task
+👥 *Referral Program:* 5% Commission per completed task
+⚡ *Instant Crypto Withdrawals:* BEP-20 (BNB Smart Chain)
+
+_Tap the button below to launch the Mini App:_
+`.trim();
 
         const keyboard = Markup.inlineKeyboard([
-          [Markup.button.webApp('🚀 Open Mini App', getWebAppUrlForUser(ctx.from))]
+          [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(ctx.from))],
+          [
+            Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+            Markup.button.url('💬 Discussion', CONFIG.PROMOTER_CHANNEL || 'https://t.me/picassopayout')
+          ]
         ]);
 
         return await ctx.replyWithMarkdown(welcomeText, keyboard);
@@ -107,7 +121,7 @@ export function initBot() {
         `• /start - Launch main interaction interface\n` +
         `• /balance - View token balances and valuation\n` +
         `• /help - Assistance and support links\n\n` +
-        `📢 Updates: ${CONFIG.OFFICIAL_CHANNEL || 'https://t.me/+paZKlKGNB2ZmNDk0'}\n` +
+        `📢 Updates: ${CONFIG.OFFICIAL_CHANNEL || 'https://t.me/AirdropIdentifyOfficial'}\n` +
         `💬 Discussion: https://t.me/picassopayout`
       );
     });
