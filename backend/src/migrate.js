@@ -69,7 +69,7 @@ export async function runMigration() {
         referrer_id VARCHAR(255) NOT NULL,
         referred_id VARCHAR(255) NOT NULL,
         referred_username VARCHAR(255),
-        reward_amount NUMERIC(10, 2) DEFAULT 0.10,
+        reward_amount NUMERIC(10, 2) DEFAULT 0.00,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_referrals_referrer_id ON referrals(referrer_id);
