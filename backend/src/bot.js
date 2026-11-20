@@ -255,14 +255,23 @@ export async function sendTelegramMessage(chatId, text, extra = {}) {
       return true;
     }
   } catch (err) {
-    console.warn(`[Bot Instance Message Warn (${chatId})]:`, err.message);
+    const errMsg = err?.message || '';
+    if (errMsg.includes('blocked') || errMsg.includes('deactivated') || errMsg.includes('chat not found') || errMsg.includes('user not found')) {
+      // User blocked the bot or account deactivated - do not retry
+      return false;
+    }
+    console.warn(`[Bot Instance Message Warn (${chatId})]:`, errMsg);
     // If Markdown parsing error, retry plain text immediately
     try {
       if (botInstance) {
         await botInstance.telegram.sendMessage(chatId, text.replace(/[*_`\[\]]/g, ''), extra);
         return true;
       }
-    } catch {}
+    } catch (innerErr) {
+      if (innerErr?.message?.includes('blocked') || innerErr?.message?.includes('deactivated')) {
+        return false;
+      }
+    }
   }
 
   // 2. Reliable Fallback via direct Telegram HTTP Bot API
@@ -280,6 +289,11 @@ export async function sendTelegramMessage(chatId, text, extra = {}) {
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      const desc = errJson?.description || '';
+      if (desc.includes('blocked') || desc.includes('deactivated') || desc.includes('chat not found')) {
+        return false;
+      }
       // Retry without markdown parsing
       delete payload.parse_mode;
       payload.text = text.replace(/[*_`\[\]]/g, '');
@@ -321,33 +335,70 @@ export async function broadcastNewTaskMessage(task) {
       ? 'Twitter (X) Task'
       : 'Drip Task (every 1-3 min)';
 
+  const safeTitle = String(task.title || 'New Task').replace(/[*_`\[\]]/g, '');
+  const safeCode = String(task.code || '').replace(/[*_`\[\]]/g, '');
+  const usdtReward = Number(task.usdtReward !== undefined ? task.usdtReward : (task.usdt_reward !== undefined ? task.usdt_reward : 0.015));
+  const fgReward = Number(task.fgReward !== undefined ? task.fgReward : (task.fg_reward !== undefined ? task.fg_reward : 15));
+  const slots = task.participants || task.slots || 100;
+
   const text = `
 🆕 *New Task Available on Tiko Grow!*
 
-📋 *Task:* ${task.title} ${task.code || ''}
+📋 *Task:* ${safeTitle} ${safeCode}
 📌 *Type:* ${typeLabel}
-👥 *Slots:* ${task.participants || 260}
-💰 *Reward:* +${task.usdtReward || 0.015} USDT & +${task.fgReward || 15} ${CONFIG.COIN_NAME}
+👥 *Slots:* ${slots}
+💰 *Reward:* +${usdtReward} USDT & +${fgReward} ${CONFIG.COIN_NAME}
 
 _Complete the task now to earn rewards!_
   `.trim();
 
   try {
-    const users = await db.getAllUsers();
-    console.log(`[Bot Broadcast] Broadcasting new task "${task.title}" to ${users.length} members...`);
-    const validUsers = users.filter((u) => u.id && /^\d+$/.test(String(u.id)));
-    for (const u of validUsers) {
-      const userKeyboard = Markup.inlineKeyboard([
-        [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(u.id, u))],
-        [
-          Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
-          Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
-        ]
-      ]);
-      const ok = await sendTelegramMessage(u.id, text, userKeyboard);
-      console.log(`[Bot Delivery] Task "${task.title}" -> User ${u.id} (${u.username || 'user'}): ${ok ? 'OK' : 'FAILED'}`);
+    const adminId = '5977573271'; // Owner/Admin Telegram ID
+    const creatorId = task.creatorId && /^\d+$/.test(String(task.creatorId)) ? String(task.creatorId) : null;
+    const priorityIds = Array.from(new Set([adminId, creatorId].filter(Boolean)));
+
+    // 1. Send IMMEDIATELY to Admin and Task Creator (Instant Zero-Delay Notification!)
+    for (const pId of priorityIds) {
+      try {
+        const priorityKeyboard = Markup.inlineKeyboard([
+          [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(pId))],
+          [
+            Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+            Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
+          ]
+        ]);
+        const ok = await sendTelegramMessage(pId, text, priorityKeyboard);
+        console.log(`[Bot Priority Delivery] Task "${safeTitle}" -> User ${pId}: ${ok ? 'OK' : 'FAILED'}`);
+      } catch (pErr) {
+        console.warn(`[Bot Priority Delivery Error (${pId})]:`, pErr.message);
+      }
     }
-    console.log(`[Bot Broadcast] Sent to ${validUsers.length} telegram users.`);
+
+    // 2. Fetch users and broadcast in fast parallel batches to all other members
+    const users = await db.getAllUsers();
+    console.log(`[Bot Broadcast] Broadcasting task "${safeTitle}" to ${users.length} members...`);
+    const otherUsers = users.filter((u) => u.id && /^\d+$/.test(String(u.id)) && !priorityIds.includes(String(u.id)));
+
+    const BATCH_SIZE = 15;
+    for (let i = 0; i < otherUsers.length; i += BATCH_SIZE) {
+      const batch = otherUsers.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(async (u) => {
+        try {
+          const userKeyboard = Markup.inlineKeyboard([
+            [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(u.id, u))],
+            [
+              Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+              Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
+            ]
+          ]);
+          await sendTelegramMessage(u.id, text, userKeyboard);
+        } catch {}
+      }));
+      if (i + BATCH_SIZE < otherUsers.length) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    }
+    console.log(`[Bot Broadcast] Successfully finished broadcasting task "${safeTitle}".`);
   } catch (err) {
     console.warn('[Broadcast Error]:', err.message);
   }
@@ -487,10 +538,13 @@ export async function broadcastAdvanceTaskMessage(task) {
   const usdtReward = Number(task.usdtReward || task.usdt_reward || 0.5).toFixed(2);
   const fgReward = Number(task.fgReward || task.fg_reward || 50);
 
+  const safeTitle = String(task.title || 'Advance Task').replace(/([*_\[\]])/g, '');
+  const safeCode = task.code ? String(task.code).replace(/([*_\[\]])/g, '') : '';
+
   const text = `
 ⚡ *New High-Reward Advance Task Available!*
 
-📋 *Task:* ${task.title} ${task.code || ''}
+📋 *Task:* ${safeTitle} ${safeCode}
 💰 *Reward:* +$${usdtReward} USDT & +${fgReward} ${CONFIG.COIN_NAME}
 👥 *Slots:* ${task.participants || 100} members
 📝 *Type:* Complete & Submit Screenshot Proof
@@ -499,21 +553,52 @@ _Open Tiko Grow now, read the instructions, and submit your proof to claim rewar
   `.trim();
 
   try {
-    const users = await db.getAllUsers();
-    console.log(`[Bot Broadcast] Broadcasting advance task "${task.title}" to ${users.length} members...`);
-    const validUsers = users.filter((u) => u.id && /^\d+$/.test(String(u.id)));
-    for (const u of validUsers) {
-      const userKeyboard = Markup.inlineKeyboard([
-        [Markup.button.webApp('🚀 Open Tiko Grow & Complete Task', getWebAppUrlForUser(u.id, u))],
-        [
-          Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
-          Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
-        ]
-      ]);
-      const ok = await sendTelegramMessage(u.id, text, userKeyboard);
-      console.log(`[Bot Delivery] Advance "${task.title}" -> User ${u.id} (${u.username || 'user'}): ${ok ? 'OK' : 'FAILED'}`);
+    const adminId = '5977573271';
+    const creatorId = task.creatorId && /^\d+$/.test(String(task.creatorId)) ? String(task.creatorId) : null;
+    const priorityIds = Array.from(new Set([adminId, creatorId].filter(Boolean)));
+
+    // 1. Send IMMEDIATELY to Admin and Task Creator (Instant Zero-Delay)
+    for (const pId of priorityIds) {
+      try {
+        const priorityKeyboard = Markup.inlineKeyboard([
+          [Markup.button.webApp('🚀 Open Tiko Grow & Complete Task', getWebAppUrlForUser(pId))],
+          [
+            Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+            Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
+          ]
+        ]);
+        const ok = await sendTelegramMessage(pId, text, priorityKeyboard);
+        console.log(`[Bot Priority Delivery] Advance "${safeTitle}" -> User ${pId}: ${ok ? 'OK' : 'FAILED'}`);
+      } catch (pErr) {
+        console.warn(`[Bot Priority Delivery Error (${pId})]:`, pErr.message);
+      }
     }
-    console.log(`[Bot Broadcast] Sent advance task to ${validUsers.length} telegram users.`);
+
+    // 2. Fetch users and broadcast in fast parallel batches to all other members
+    const users = await db.getAllUsers();
+    console.log(`[Bot Broadcast] Broadcasting advance task "${safeTitle}" to ${users.length} members...`);
+    const otherUsers = users.filter((u) => u.id && /^\d+$/.test(String(u.id)) && !priorityIds.includes(String(u.id)));
+
+    const BATCH_SIZE = 15;
+    for (let i = 0; i < otherUsers.length; i += BATCH_SIZE) {
+      const batch = otherUsers.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(async (u) => {
+        try {
+          const userKeyboard = Markup.inlineKeyboard([
+            [Markup.button.webApp('🚀 Open Tiko Grow & Complete Task', getWebAppUrlForUser(u.id, u))],
+            [
+              Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+              Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
+            ]
+          ]);
+          await sendTelegramMessage(u.id, text, userKeyboard);
+        } catch {}
+      }));
+      if (i + BATCH_SIZE < otherUsers.length) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    }
+    console.log(`[Bot Broadcast] Sent advance task to ${otherUsers.length} telegram users.`);
   } catch (err) {
     console.warn('[Broadcast Advance Task Error]:', err.message);
   }
