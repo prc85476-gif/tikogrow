@@ -58,13 +58,7 @@ export function initBot() {
         const refPayload = ctx.payload || (ctx.message?.text ? ctx.message.text.split(' ')[1] : null);
         if (refPayload) {
           try {
-            const trackRes = await db.trackReferral(tgUser.id, refPayload);
-            if (trackRes.tracked && trackRes.referrerId) {
-              notifyReferralJoined(trackRes.referrerId, {
-                firstName: tgUser.first_name,
-                username: tgUser.username
-              }).catch(() => null);
-            }
+            await db.trackReferral(tgUser.id, refPayload);
           } catch (refErr) {
             console.warn('[Bot Referral Track Warn]:', refErr.message);
           }
@@ -310,18 +304,10 @@ export async function sendTelegramMessage(chatId, text, extra = {}) {
   }
 }
 
-// 0. Referral Joined notification to referrer (0.1$ receive from username)
+// 0. Referral Joined notification to referrer (Permanently Disabled by User Request)
 export async function notifyReferralJoined(referrerId, joinedUser) {
-  if (!referrerId) return false;
-  const username = joinedUser?.username ? `@${joinedUser.username}` : (joinedUser?.firstName || 'user');
-
-  const text = `🎉 *0.1$ receive from ${username}*\n\nYour referral joined Aviator! $0.10 has been added to your Deposit Balance.`;
-
-  const keyboard = Markup.inlineKeyboard([
-    [Markup.button.webApp('🚀 Open Mini App', getWebAppUrlForUser(referrerId))]
-  ]);
-
-  return sendTelegramMessage(referrerId, text, keyboard);
+  // Permanently disabled - no referral join message will ever be sent to Telegram bot
+  return false;
 }
 
 // 1. Broadcast New Task to all users
