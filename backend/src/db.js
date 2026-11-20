@@ -873,11 +873,11 @@ class Database {
     await this.initPromise;
     const user = await this.getUser(userId);
 
-    // Active referrals: invited members who completed at least 30 tasks!
+    // Active referrals: invited members who completed at least 50 tasks!
     const activeRes = await pool.query(`
       SELECT COUNT(*)::int as count 
       FROM users 
-      WHERE referred_by = $1 AND done_tasks_count >= 30
+      WHERE referred_by = $1 AND done_tasks_count >= 50
     `, [String(userId)]);
     const activeReferralCount = activeRes.rows[0]?.count || 0;
 
@@ -922,16 +922,16 @@ class Database {
         throw new Error('Milestone reward already claimed!');
       }
 
-      // Active referrals check: must have completed at least 30 tasks
+      // Active referrals check: must have completed at least 50 tasks
       const activeRes = await client.query(`
         SELECT COUNT(*)::int as count 
         FROM users 
-        WHERE referred_by = $1 AND done_tasks_count >= 30
+        WHERE referred_by = $1 AND done_tasks_count >= 50
       `, [String(userId)]);
       const activeReferralCount = activeRes.rows[0]?.count || 0;
 
       if (activeReferralCount < milestone.required) {
-        throw new Error(`Requires ${milestone.required} active referrals (members who completed at least 30 tasks). Current: ${activeReferralCount}`);
+        throw new Error(`Requires ${milestone.required} active referrals (members who completed at least 50 tasks). Current: ${activeReferralCount}`);
       }
 
       const usdtReward = Number(parseFloat(milestone.usdt_reward || 0));
@@ -1007,12 +1007,10 @@ class Database {
         WHERE id = $2
       `, [referrer.id, uId]);
 
-      // Credit $0.10 USDT to referrer's Deposit Balance directly
+      // Increment referral count (5% lifetime USDT commission earned on task completions)
       await client.query(`
         UPDATE users
         SET referral_count = referral_count + 1,
-            deposit_balance = deposit_balance + 0.10,
-            referral_usdt_earned = referral_usdt_earned + 0.10,
             updated_at = NOW()
         WHERE id = $1
       `, [referrer.id]);
@@ -1020,7 +1018,7 @@ class Database {
       // Record in referrals table
       await client.query(`
         INSERT INTO referrals (referrer_id, referred_id, referred_username, reward_amount, created_at)
-        VALUES ($1, $2, $3, 0.10, NOW())
+        VALUES ($1, $2, $3, 0.00, NOW())
       `, [referrer.id, uId, userRes.rows[0]?.username || ('user_' + uId.slice(-4))]);
 
       await client.query('COMMIT');
@@ -1436,7 +1434,7 @@ class Database {
     const baseUser = formatUser(res.rows[0]);
     const userId = String(baseUser.id);
 
-    // 1. Fetch Referrals & Active Referrals (tasks >= 30)
+    // 1. Fetch Referrals & Active Referrals (tasks >= 50)
     const refRes = await pool.query(`
       SELECT u.id, u.username, u.first_name, u.created_at,
              COUNT(tc.task_id) as done_tasks_count
@@ -1453,7 +1451,7 @@ class Database {
       firstName: r.first_name,
       createdAt: r.created_at,
       doneTasksCount: parseInt(r.done_tasks_count || 0),
-      isActive: parseInt(r.done_tasks_count || 0) >= 30
+      isActive: parseInt(r.done_tasks_count || 0) >= 50
     }));
 
     const totalReferrals = referralsList.length;

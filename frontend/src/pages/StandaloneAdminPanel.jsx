@@ -2668,7 +2668,7 @@ export default function StandaloneAdminPanel() {
                       <div className="bg-black/40 border border-[#00DF8F]/20 bg-[#00DF8F]/5 rounded-xl p-3">
                         <span className="text-[10px] text-[#00DF8F] block font-bold uppercase">Active Referrals</span>
                         <span className="text-sm font-black text-[#00DF8F] font-mono mt-0.5 block">
-                          {foundUser.activeReferralsCount ?? 0} (≥30 Tasks)
+                          {foundUser.activeReferralsCount ?? 0} (≥50 Tasks)
                         </span>
                       </div>
 

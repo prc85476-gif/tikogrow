@@ -718,6 +718,11 @@ app.post('/api/user/track-referral', async (req, res) => {
   }
   try {
     const result = await db.trackReferral(userId, referralCode);
+    if (result.tracked && result.referrerId) {
+      db.getUser(userId).then((joinedUser) => {
+        notifyReferralJoined(result.referrerId, joinedUser).catch(() => null);
+      }).catch(() => null);
+    }
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

@@ -1486,7 +1486,7 @@ export function AppProvider({ children }) {
         fetchMilestones(user.id);
       } else {
         const errData = res ? await res.json().catch(() => null) : null;
-        showToast(errData?.error || 'Milestone requirements not met: Each referral must complete 20+ tasks to count!', 'error');
+        showToast(errData?.error || 'Milestone requirements not met: Each referral must complete 50+ tasks to count!', 'error');
       }
     } catch {
       showToast('Error claiming milestone', 'error');

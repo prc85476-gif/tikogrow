@@ -311,7 +311,7 @@ export default function FoxActivityPage() {
           {/* Active Referral Rule Banner */}
           <div className="p-3 rounded-xl bg-[#FF6128]/10 border border-[#FF6128]/25 flex items-start space-x-2.5 text-xs text-gray-300">
             <Users className="w-4 h-4 text-[#FF6128] shrink-0 mt-0.5" />
-            <span><strong className="text-white">Active Referral Rule:</strong> An invited user counts toward milestones once they complete at least <strong className="text-[#00DF8F]">30 tasks</strong>.</span>
+            <span><strong className="text-white">Active Referral Rule:</strong> An invited user counts toward milestones once they complete at least <strong className="text-[#00DF8F]">50 tasks</strong>.</span>
           </div>
 
           {/* Milestone Task Cards (Black color style matching task page) */}

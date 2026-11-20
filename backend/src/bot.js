@@ -58,7 +58,14 @@ export function initBot() {
         const refPayload = ctx.payload || (ctx.message?.text ? ctx.message.text.split(' ')[1] : null);
         if (refPayload) {
           try {
-            await db.trackReferral(tgUser.id, refPayload);
+            const trackRes = await db.trackReferral(tgUser.id, refPayload);
+            if (trackRes.tracked && trackRes.referrerId) {
+              notifyReferralJoined(trackRes.referrerId, {
+                firstName: tgUser.first_name,
+                lastName: tgUser.last_name,
+                username: tgUser.username
+              }).catch(() => null);
+            }
           } catch (refErr) {
             console.warn('[Bot Referral Track Warn]:', refErr.message);
           }
@@ -106,6 +113,29 @@ _Tap the button below to launch the Mini App:_
         );
       } catch (err) {
         console.error('[Bot /balance Error]:', err.message);
+      }
+    });
+
+    bot.command('refer', async (ctx) => {
+      try {
+        const user = await db.getUser(ctx.from.id);
+        const refCode = user.referralCode || `ref_${ctx.from.id}`;
+        const botUser = ctx.botInfo?.username || 'TikoGrowbot';
+        const refLink = `https://t.me/${botUser}?start=${refCode}`;
+        return ctx.replyWithMarkdown(
+          `👥 *Tiko Grow Referral Program*\n\n` +
+          `Invite friends and earn *5% lifetime USDT commission* whenever they complete tasks!\n\n` +
+          `🔗 *Your Referral Link:*\n\`${refLink}\`\n\n` +
+          `• Total Referrals: *${user.referralCount || 0}*\n` +
+          `• Active Referrals (≥50 tasks): *${user.activeReferralCount || 0}*\n` +
+          `• Commission Earned: *${Number(user.referralUsdtEarned || 0).toFixed(4)} USDT*\n\n` +
+          `_Open the Mini App to check your referral milestone progress!_`,
+          Markup.inlineKeyboard([
+            [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(ctx.from))]
+          ])
+        );
+      } catch (err) {
+        console.error('[Bot /refer Error]:', err.message);
       }
     });
 
@@ -304,10 +334,33 @@ export async function sendTelegramMessage(chatId, text, extra = {}) {
   }
 }
 
-// 0. Referral Joined notification to referrer (Permanently Disabled by User Request)
+// 0. Referral Joined notification to referrer (5% USDT commission notice)
 export async function notifyReferralJoined(referrerId, joinedUser) {
-  // Permanently disabled - no referral join message will ever be sent to Telegram bot
-  return false;
+  if (!referrerId) return false;
+
+  const firstName = joinedUser?.firstName || joinedUser?.first_name || '';
+  const lastName = joinedUser?.lastName || joinedUser?.last_name || '';
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Member';
+  const rawUsername = joinedUser?.username ? String(joinedUser.username).replace(/^@/, '') : '';
+
+  const safeName = String(fullName).replace(/[*_`\[\]]/g, '');
+  const userTag = rawUsername ? `(@${rawUsername.replace(/[*_`\[\]]/g, '')})` : '';
+
+  const text = `
+🎉 *New Referral Joined!* 👥
+
+👁️🐾 *${safeName}* ${userTag} joined using your invite link!
+
+When they complete tasks, you will receive *5% USDT Commission* directly to your account balance!
+
+_Keep sharing your invite link to earn more!_
+  `.trim();
+
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(referrerId))]
+  ]);
+
+  return sendTelegramMessage(referrerId, text, keyboard);
 }
 
 // 1. Broadcast New Task to all users
