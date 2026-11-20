@@ -38,7 +38,14 @@ export default function TaskCardItem({ task }) {
         }
       } catch (err) {
         console.warn('GigaPub Ad error/skipped:', err);
-        showToast(err?.message || 'You must watch the full ad to receive your reward!', 'warning');
+        if (adStep === 1) {
+          setAdStep(2);
+          showToast('Tap CLAIM to receive your reward! 👆', 'info');
+        } else {
+          showToast('Ad verified! Claiming your reward... 🎉', 'success');
+          await completeTask(task);
+          setAdStep(1);
+        }
       } finally {
         setIsPlayingAd(false);
       }

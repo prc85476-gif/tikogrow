@@ -1,20 +1,21 @@
-import { pool } from '../backend/src/db.js';
+import pg from 'pg';
+import { CONFIG } from '../backend/src/config.js';
 
-async function check() {
-  const res = await pool.query('SELECT id, code, title, created_at FROM tasks ORDER BY created_at ASC');
-  console.log('Total tasks in tasks table:', res.rows.length);
-  res.rows.forEach((r, i) => {
-    console.log(`[${i + 1}] ID: ${r.id} | Code: ${r.code} | Title: ${r.title}`);
+async function main() {
+  const pool = new pg.Pool({
+    connectionString: CONFIG.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
   });
 
-  const advRes = await pool.query('SELECT id, code, title, created_at FROM advance_tasks ORDER BY created_at ASC');
-  console.log('\nTotal advance tasks:', advRes.rows.length);
-  advRes.rows.forEach((r, i) => {
-    console.log(`[${i + 1}] ID: ${r.id} | Code: ${r.code} | Title: ${r.title}`);
-  });
+  const res = await pool.query('SELECT id, title, category, type, participants, joined_members, status FROM tasks ORDER BY id');
+  console.log('Tasks in DB count:', res.rows.length);
+  console.table(res.rows);
 
-  process.exit(0);
+  const compRes = await pool.query('SELECT task_id, count(*) FROM task_completions GROUP BY task_id');
+  console.log('Task completions count:');
+  console.table(compRes.rows);
+
+  await pool.end();
 }
 
-check();
-
+main().catch(console.error);

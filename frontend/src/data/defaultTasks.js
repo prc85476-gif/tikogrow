@@ -6,12 +6,12 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.015,
     fgReward: 15.0,
-    participants: 28540,
-    joinedMembers: 14210,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#TG801',
     category: 'telegram',
     type: 'telegram',
-    link: 'https://t.me/+paZKlKGNB2ZmNDk0',
+    link: 'https://t.me/AirdropIdentifyOfficial',
     status: 'approved'
   },
   {
@@ -21,8 +21,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 19820,
-    joinedMembers: 9840,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#X315',
     category: 'twitter',
     type: 'twitter',
@@ -36,8 +36,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.015,
     fgReward: 15.0,
-    participants: 16400,
-    joinedMembers: 8120,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#GRP99',
     category: 'telegram',
     type: 'telegram',
@@ -51,8 +51,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.015,
     fgReward: 15.0,
-    participants: 22300,
-    joinedMembers: 11150,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#TG802',
     category: 'telegram',
     type: 'telegram',
@@ -66,8 +66,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.015,
     fgReward: 15.0,
-    participants: 19500,
-    joinedMembers: 9700,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#TG803',
     category: 'telegram',
     type: 'telegram',
@@ -80,7 +80,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 13586,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#31546',
     category: 'twitter',
     type: 'twitter',
@@ -93,7 +94,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 2,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#53614',
     category: 'twitter',
     type: 'twitter',
@@ -106,7 +108,8 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 4,
+    participants: 1000,
+    joinedMembers: 0,
     code: '#53426',
     category: 'twitter',
     type: 'twitter',
@@ -119,12 +122,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 35000,
-    joinedMembers: 14200,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD101',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_2',
@@ -132,12 +136,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.01,
     fgReward: 10.0,
-    participants: 32000,
-    joinedMembers: 12500,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD102',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_3',
@@ -145,12 +150,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 28000,
-    joinedMembers: 9800,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD103',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_4',
@@ -158,12 +164,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 25000,
-    joinedMembers: 8200,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD104',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_5',
@@ -171,12 +178,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 22000,
-    joinedMembers: 7100,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD105',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_6',
@@ -184,12 +192,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 20000,
-    joinedMembers: 6400,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD106',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_7',
@@ -197,12 +206,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 19000,
-    joinedMembers: 5900,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD107',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_8',
@@ -210,12 +220,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 18000,
-    joinedMembers: 5100,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD108',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_9',
@@ -223,12 +234,13 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 17000,
-    joinedMembers: 4600,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD109',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   },
   {
     id: 'task_ad_10',
@@ -236,12 +248,12 @@ export const DEFAULT_TASKS = [
     hasGlobe: false,
     usdtReward: 0.005,
     fgReward: 5.0,
-    participants: 16000,
-    joinedMembers: 4100,
+    participants: 5000,
+    joinedMembers: 0,
     code: '#AD110',
     category: 'ads',
     type: 'ad',
-    link: ''
+    link: '',
+    status: 'approved'
   }
 ];
-

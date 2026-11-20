@@ -233,8 +233,8 @@
       "hasGlobe": false,
       "usdtReward": 0.015,
       "fgReward": 15,
-      "participants": 28540,
-      "joinedMembers": 14210,
+      "participants": 1000,
+      "joinedMembers": 0,
       "code": "#TG801",
       "category": "telegram",
       "type": "telegram",
@@ -248,8 +248,8 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 19820,
-      "joinedMembers": 9840,
+      "participants": 1000,
+      "joinedMembers": 0,
       "code": "#X315",
       "category": "twitter",
       "type": "twitter",
@@ -263,8 +263,8 @@
       "hasGlobe": false,
       "usdtReward": 0.015,
       "fgReward": 15,
-      "participants": 16400,
-      "joinedMembers": 8120,
+      "participants": 1000,
+      "joinedMembers": 0,
       "code": "#GRP99",
       "category": "telegram",
       "type": "telegram",
@@ -278,8 +278,8 @@
       "hasGlobe": false,
       "usdtReward": 0.015,
       "fgReward": 15,
-      "participants": 22300,
-      "joinedMembers": 11150,
+      "participants": 1000,
+      "joinedMembers": 0,
       "code": "#TG802",
       "category": "telegram",
       "type": "telegram",
@@ -293,8 +293,8 @@
       "hasGlobe": false,
       "usdtReward": 0.015,
       "fgReward": 15,
-      "participants": 19500,
-      "joinedMembers": 9700,
+      "participants": 1000,
+      "joinedMembers": 0,
       "code": "#TG803",
       "category": "telegram",
       "type": "telegram",
@@ -307,11 +307,13 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 13586,
+      "participants": 1000,
       "code": "#31546",
       "category": "twitter",
       "type": "twitter",
-      "link": "https://x.com/Theroyal_Crypto"
+      "link": "https://x.com/Theroyal_Crypto",
+      "joinedMembers": 0,
+      "status": "approved"
     },
     {
       "id": "task_tw_2",
@@ -319,11 +321,13 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 2,
+      "participants": 1000,
       "code": "#53614",
       "category": "twitter",
       "type": "twitter",
-      "link": "https://x.com/Theroyal_Crypto"
+      "link": "https://x.com/Theroyal_Crypto",
+      "joinedMembers": 0,
+      "status": "approved"
     },
     {
       "id": "task_tw_4",
@@ -331,11 +335,13 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 4,
+      "participants": 1000,
       "code": "#53426",
       "category": "twitter",
       "type": "twitter",
-      "link": "https://x.com/Theroyal_Crypto"
+      "link": "https://x.com/Theroyal_Crypto",
+      "joinedMembers": 0,
+      "status": "approved"
     },
     {
       "id": "task_ad_1",
@@ -343,12 +349,13 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 35000,
-      "joinedMembers": 14200,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD101",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_2",
@@ -356,12 +363,13 @@
       "hasGlobe": false,
       "usdtReward": 0.01,
       "fgReward": 10,
-      "participants": 32000,
-      "joinedMembers": 12500,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD102",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_3",
@@ -369,12 +377,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 28000,
-      "joinedMembers": 9800,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD103",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_4",
@@ -382,12 +391,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 25000,
-      "joinedMembers": 8200,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD104",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_5",
@@ -395,12 +405,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 22000,
-      "joinedMembers": 7100,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD105",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_6",
@@ -408,12 +419,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 20000,
-      "joinedMembers": 6400,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD106",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_7",
@@ -421,12 +433,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 19000,
-      "joinedMembers": 5900,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD107",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_8",
@@ -434,12 +447,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 18000,
-      "joinedMembers": 5100,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD108",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_9",
@@ -447,12 +461,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 17000,
-      "joinedMembers": 4600,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD109",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     },
     {
       "id": "task_ad_10",
@@ -460,12 +475,13 @@
       "hasGlobe": false,
       "usdtReward": 0.005,
       "fgReward": 5,
-      "participants": 16000,
-      "joinedMembers": 4100,
+      "participants": 5000,
+      "joinedMembers": 0,
       "code": "#AD110",
       "category": "ads",
       "type": "ad",
-      "link": ""
+      "link": "",
+      "status": "approved"
     }
   ],
   "referralMilestones": [

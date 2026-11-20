@@ -212,6 +212,20 @@ export async function runMigration() {
 
     console.log('[Neon] Tables verified.');
 
+    // Ensure default tasks have required limits: Telegram/Twitter (1000) and Ads (5000)
+    await client.query(`
+      UPDATE tasks 
+      SET participants = 1000 
+      WHERE (category = 'telegram' OR category = 'twitter') 
+        AND id IN ('task_official_channel', 'task_official_channel_2', 'task_official_channel_3', 'task_official_group', 'task_official_twitter', 'task_tw_1', 'task_tw_2', 'task_tw_4')
+        AND participants != 1000;
+
+      UPDATE tasks 
+      SET participants = 5000 
+      WHERE (category = 'ads' OR type = 'ad' OR id LIKE 'task_ad_%')
+        AND participants != 5000;
+    `);
+
     // Seed referral milestones if empty
     const { rows: milestoneRows } = await client.query('SELECT COUNT(*) as count FROM referral_milestones');
     if (parseInt(milestoneRows[0].count) === 0) {

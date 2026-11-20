@@ -1222,7 +1222,11 @@ export function AppProvider({ children }) {
         } catch {}
 
         if (isAd) {
-          setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: true } : t)));
+          if (data.task && (data.task.status === 'completed' || (data.task.participants > 0 && data.task.joinedMembers >= data.task.participants))) {
+            setTasks((prev) => prev.filter((t) => t.id !== task.id));
+          } else {
+            setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...(data.task || {}), completed: true } : t)));
+          }
         } else if (data.task) {
           if (data.task.status === 'completed' || (data.task.participants > 0 && data.task.joinedMembers >= data.task.participants)) {
             // Task has reached completion limit -> remove from active tasks immediately!
