@@ -1,0 +1,4 @@
+name = "tiko-tg-proxy"
+main = "index.js"
+compatibility_date = "2024-11-01"
+

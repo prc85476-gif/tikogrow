@@ -1,0 +1,11 @@
+node_modules
+.git
+.gitignore
+.env
+.env.*
+.wrangler
+frontend/node_modules
+backend/node_modules
+frontend/dist
+uploads/advance_proofs/*
+!uploads/advance_proofs/.gitkeep

@@ -1,0 +1,12 @@
+{
+  "name": "nova-telegram-earning-bot",
+  "version": "1.0.0",
+  "description": "Telegram Earning Bot & Mini App - Watch Ads (10 coins), Complete Tasks, Swap to USDT, Withdraw BEP-20",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "deploy": "cd frontend && npm run build && npx wrangler pages deploy dist --project-name=foxtask --commit-dirty=true"
+  }
+}
+

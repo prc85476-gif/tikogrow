@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0A0C10;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* FoxTask Signature Colors */
+:root {
+  --foxtask-orange: #FF6128;
+  --foxtask-orange-dark: #E8521A;
+  --foxtask-green: #00DF8F;
+  --foxtask-yellow: #FBBF24;
+  --foxtask-card: #12151D;
+  --foxtask-border: rgba(255, 255, 255, 0.07);
+}
+
+/* FoxTask Card Box */
+.foxtask-card {
+  background-color: #12151D;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Orange 3D Puffy Button */
+.btn-orange-3d {
+  background: linear-gradient(180deg, #FF7E40 0%, #FF5A20 100%);
+  color: #FFFFFF;
+  font-weight: 800;
+  box-shadow: 0 4px 14px 0 rgba(255, 90, 32, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-orange-3d:hover {
+  background: linear-gradient(180deg, #FF8A50 0%, #FF652C 100%);
+  box-shadow: 0 6px 18px 0 rgba(255, 90, 32, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-orange-3d:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px 0 rgba(255, 90, 32, 0.3);
+}
+
+/* FoxTask Big Hero Start Button */
+.btn-hero-orange {
+  background: linear-gradient(90deg, #FF7E40 0%, #FF6128 50%, #FF4B1F 100%);
+  box-shadow: 0 6px 20px rgba(255, 97, 40, 0.4);
+}
+
+.btn-hero-orange:active {
+  transform: scale(0.98);
+}
+
+/* Subtle Glowing Ring for Avatar */
+.avatar-orange-glow {
+  box-shadow: 0 0 15px rgba(255, 97, 40, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0C10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232733;
+  border-radius: 9999px;
+}
+
+/* ========================================================= */
+/*                   LIGHT MODE THEME STYLES                 */
+/* ========================================================= */
+
+body.theme-light,
+.theme-light {
+  color-scheme: light;
+  background-color: #F0F2F5 !important;
+  color: #0F172A !important;
+}
+
+body.theme-light {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+}
+
+/* Light Mode Cards */
+.theme-light .foxtask-card {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Dark Background Replacements in Light Mode */
+.theme-light .bg-\[\#0A0C10\],
+.theme-light .bg-\[\#0B0F19\],
+.theme-light .bg-\[\#12141A\],
+.theme-light .bg-\[\#141722\],
+.theme-light .bg-\[\#181B26\],
+.theme-light .bg-\[\#161922\],
+.theme-light .bg-\[\#12151D\] {
+  background-color: #FFFFFF !important;
+}
+
+/* Inputs & Inner Dark Slots */
+.theme-light .bg-\[\#0B0D12\] {
+  background-color: #F8FAFC !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.theme-light .bg-black\/20,
+.theme-light .bg-black\/30,
+.theme-light .bg-black\/40,
+.theme-light .bg-black\/50,
+.theme-light .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.theme-light .bg-white\/5,
+.theme-light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Light Mode Text Typography */
+.theme-light .text-white {
+  color: #0F172A !important;
+}
+
+.theme-light .text-gray-100,
+.theme-light .text-gray-200 {
+  color: #1E293B !important;
+}
+
+.theme-light .text-gray-300 {
+  color: #334155 !important;
+}
+
+.theme-light .text-gray-400 {
+  color: #64748B !important;
+}
+
+.theme-light .text-gray-500 {
+  color: #94A3B8 !important;
+}
+
+/* Light Borders */
+.theme-light .border-white\/5,
+.theme-light .border-white\/10,
+.theme-light .border-white\/15,
+.theme-light .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Bottom Navigation Bar in Light Mode */
+.theme-light nav {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Inputs & Textareas */
+.theme-light input,
+.theme-light textarea {
+  color: #0F172A !important;
+}
+
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Preserve White Text for Orange Buttons and Badges */
+.theme-light .btn-orange-3d,
+.theme-light .btn-hero-orange,
+.theme-light .btn-orange-3d *,
+.theme-light .btn-hero-orange *,
+.theme-light .bg-\[\#FF6128\],
+.theme-light .bg-\[\#FF6128\] *,
+.theme-light [class*="bg-gradient-to-r from-[#FF6128]"],
+.theme-light [class*="bg-gradient-to-r from-[#FF6128]"] * {
+  color: #FFFFFF !important;
+}
+
+/* Readability Enhancements for Green / Gold on Light Mode */
+.theme-light .text-\[\#00DF8F\] {
+  color: #059669 !important;
+}
+
+.theme-light .text-\[\#FBBF24\] {
+  color: #D97706 !important;
+}
+
+.theme-light .text-\[\#FF6128\] {
+  color: #EA580C !important;
+}
+
+/* Scrollbar for Light Mode */
+.theme-light ::-webkit-scrollbar-track {
+  background: #F0F2F5;
+}
+
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+}
+
+/* Subtle Gate Screen Passkey Shake Animation */
+@keyframes input-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: input-shake 0.35s ease-in-out;
+}

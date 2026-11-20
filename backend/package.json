@@ -1,0 +1,19 @@
+{
+  "name": "nova-telegram-bot-backend",
+  "version": "1.0.0",
+  "description": "Telegram Earning Bot & Mini App Backend - Watch Ads, Complete Tasks, Swap to USDT BEP-20",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1",
+    "telegraf": "^4.16.3"
+  }
+}
