@@ -226,9 +226,37 @@ class Database {
       userRow = insertRes.rows[0];
     }
 
-    // Get completed task ids
+    // 24-hour Auto-reset for Ads
+    const COOLDOWN_24H = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const allAdsCompletedAt = userRow.all_ads_completed_at ? Number(userRow.all_ads_completed_at) : null;
+    let adCompletions = typeof userRow.ad_completions === 'object' && userRow.ad_completions !== null ? { ...userRow.ad_completions } : {};
+
+    if (allAdsCompletedAt && (now - allAdsCompletedAt >= COOLDOWN_24H)) {
+      // 24 hours passed since all ads were completed -> reset for user!
+      userRow.ad_completions = {};
+      userRow.all_ads_completed_at = null;
+      await pool.query("UPDATE users SET ad_completions = '{}'::jsonb, all_ads_completed_at = NULL WHERE id = $1", [id]);
+      await pool.query("DELETE FROM task_completions WHERE user_id = $1 AND task_id LIKE 'task_ad_%'", [id]);
+    } else {
+      let changed = false;
+      for (const [adId, ts] of Object.entries(adCompletions)) {
+        if (now - Number(ts) >= COOLDOWN_24H) {
+          delete adCompletions[adId];
+          changed = true;
+        }
+      }
+      if (changed) {
+        userRow.ad_completions = adCompletions;
+        await pool.query('UPDATE users SET ad_completions = $1 WHERE id = $2', [JSON.stringify(adCompletions), id]);
+      }
+    }
+
+    // Get completed task ids (excluding ads that are not in active 24h cooldown)
     const compRes = await pool.query('SELECT task_id FROM task_completions WHERE user_id = $1', [id]);
-    const tasksCompleted = compRes.rows.map((r) => r.task_id);
+    const tasksCompleted = compRes.rows
+      .map((r) => r.task_id)
+      .filter((tId) => !tId.startsWith('task_ad_') || Boolean(userRow.ad_completions?.[tId]));
 
     return formatUser(userRow, tasksCompleted);
   }
@@ -684,20 +712,30 @@ class Database {
       let newAllAdsCompletedAt = userRow.all_ads_completed_at ? Number(userRow.all_ads_completed_at) : null;
 
       if (isAd) {
-        // If all ads were already completed and still in 24h cooldown, reject
+        // If 24h passed since all ads were completed, clear the cooldown
+        if (newAllAdsCompletedAt && (now - newAllAdsCompletedAt >= COOLDOWN_24H)) {
+          newAllAdsCompletedAt = null;
+        }
+
+        // If all ads were completed and still in 24h cooldown, reject
         if (newAllAdsCompletedAt && (now - newAllAdsCompletedAt < COOLDOWN_24H)) {
           const remainingHours = Math.ceil((COOLDOWN_24H - (now - newAllAdsCompletedAt)) / (1000 * 60 * 60));
           throw new Error(`All ads completed for today! New ads will be available in ${remainingHours} hours.`);
         }
 
+        // Check if this specific ad was completed within the last 24h
+        if (adCompletions[taskId] && (now - Number(adCompletions[taskId]) < COOLDOWN_24H)) {
+          throw new Error('This ad was already completed today. It will be available again tomorrow!');
+        }
+
         adCompletions[taskId] = now;
 
-        // Check if ALL active ads are completed now
+        // Check if ALL remaining active ads are completed now
         const allAdsRes = await client.query(
-          "SELECT id FROM tasks WHERE (category = 'ads' OR type = 'ad' OR id LIKE 'task_ad_%') AND status = 'approved'"
+          "SELECT id FROM tasks WHERE (category = 'ads' OR type = 'ad' OR id LIKE 'task_ad_%') AND status = 'approved' AND (participants <= 0 OR participants IS NULL OR joined_members < participants)"
         );
         const allAdIds = allAdsRes.rows.map(r => r.id);
-        const allDone = allAdIds.length > 0 && allAdIds.every(id => adCompletions[id] || id === taskId);
+        const allDone = allAdIds.length > 0 && allAdIds.every(id => (adCompletions[id] && (now - Number(adCompletions[id]) < COOLDOWN_24H)) || id === taskId);
         if (allDone) {
           newAllAdsCompletedAt = now;
         }

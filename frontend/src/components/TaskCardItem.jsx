@@ -166,8 +166,8 @@ export default function TaskCardItem({ task }) {
             {/* Progress dash indicator & code */}
             <div className="flex items-center space-x-1.5 text-[11px] text-gray-400 font-semibold">
               <span className="w-4 h-1 bg-[#FF6128] rounded-full inline-block"></span>
-              <span className="font-mono text-gray-300">
-                {task.joinedMembers ? `${task.joinedMembers}/${task.participants}` : task.participants}
+              <span className="font-mono text-gray-200 font-bold">
+                {Number(task.joinedMembers || 0)}/{task.participants || 1000}
               </span>
               <span className="text-gray-500 font-mono text-[10px]">{task.code}</span>
             </div>

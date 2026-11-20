@@ -65,7 +65,10 @@ export default function FoxTasksPage() {
     <div className="pt-2 px-4 pb-28 select-none space-y-3">
       {/* App Bar title */}
       <div className="flex items-center justify-between text-gray-300 text-sm">
-        <span className="font-bold text-white text-base tracking-tight">FoxTask</span>
+        <span className="font-extrabold text-white text-base tracking-tight flex items-center space-x-1">
+          <span className="text-[#FF6128]">Tiko</span>
+          <span>Grow</span>
+        </span>
         <div className="text-gray-400">⋮</div>
       </div>
 

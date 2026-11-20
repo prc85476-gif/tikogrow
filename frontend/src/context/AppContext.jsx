@@ -77,17 +77,29 @@ export function sortTasksByPriority(taskList) {
 function filterActiveTasks(taskList, userObj) {
   const completedList = userObj?.tasksCompleted || [];
   const adCompletions = userObj?.adCompletions || {};
+  const COOLDOWN_24H = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const allAdsCompletedAt = userObj?.allAdsCompletedAt ? Number(userObj.allAdsCompletedAt) : null;
+  const isAllAds24hPassed = allAdsCompletedAt && (now - allAdsCompletedAt >= COOLDOWN_24H);
 
   const base = Array.isArray(taskList) && taskList.length > 0 ? taskList : DEFAULT_TASKS;
 
   // Filter out tasks that reached maximum participant limit or were marked completed
   const filtered = base.filter((task) => {
-    if (task.status === 'completed') return false;
+    if (task.status === 'completed' || task.status === 'ended') return false;
     if (task.participants > 0 && (task.joinedMembers || 0) >= task.participants) return false;
     return true;
   }).map((task) => {
     const isAd = task.category === 'ads' || task.type === 'ad' || task.id?.startsWith('task_ad_');
-    const isCompleted = completedList.includes(task.id) || (isAd && Boolean(adCompletions[task.id]));
+    let isCompleted = completedList.includes(task.id);
+    if (isAd) {
+      if (isAllAds24hPassed) {
+        isCompleted = false;
+      } else {
+        const adTime = adCompletions[task.id];
+        isCompleted = Boolean(adTime && (now - Number(adTime) < COOLDOWN_24H));
+      }
+    }
     return {
       ...task,
       completed: isCompleted
@@ -1151,7 +1163,7 @@ export function AppProvider({ children }) {
   const fetchTasks = async (uid = user?.id) => {
     const targetUid = uid || user?.id || 'guest_user';
     try {
-      const res = await fetch(`${API_BASE}/tasks?userId=${targetUid}`).catch(() => null);
+      const res = await fetch(`${API_BASE}/tasks?userId=${targetUid}&_t=${Date.now()}`).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
