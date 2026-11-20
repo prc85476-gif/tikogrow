@@ -12,7 +12,7 @@ const BANNER_IMAGE_PATH = path.join(__dirname, 'assets', 'tiko_banner.jpg');
 let botInstance = null;
 
 export function getWebAppUrlForUser(userOrChatId, userMeta = {}) {
-  const base = CONFIG.WEBAPP_URL || 'https://foxtask.pages.dev';
+  const base = CONFIG.WEBAPP_URL || 'https://qz4gige81pt4u0yx81c5obvc.179.197.255.88.sslip.io';
   if (!userOrChatId) return base;
   const id = typeof userOrChatId === 'object' ? userOrChatId.id : userOrChatId;
   const name = typeof userOrChatId === 'object' ? (userOrChatId.first_name || '') : (userMeta.firstName || userMeta.first_name || '');
@@ -33,7 +33,7 @@ export function initBot() {
   try {
     const bot = new Telegraf(CONFIG.BOT_TOKEN, {
       telegram: {
-        apiRoot: CONFIG.TELEGRAM_API_ROOT || 'https://tiko-tg-proxy.prc85476.workers.dev'
+        apiRoot: CONFIG.TELEGRAM_API_ROOT || 'https://api.telegram.org'
       }
     });
 
@@ -259,7 +259,7 @@ export async function sendTelegramMessage(chatId, text, extra = {}) {
       parse_mode: 'Markdown',
       ...(extra.reply_markup ? { reply_markup: extra.reply_markup } : {})
     };
-    const root = CONFIG.TELEGRAM_API_ROOT || 'https://tiko-tg-proxy.prc85476.workers.dev';
+    const root = CONFIG.TELEGRAM_API_ROOT || 'https://api.telegram.org';
     let res = await fetch(`${root}/bot${CONFIG.BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

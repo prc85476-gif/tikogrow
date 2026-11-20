@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import { DEFAULT_TASKS } from '../data/defaultTasks';
 
 const AppContext = createContext();
-export const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://tiko-tg-proxy.prc85476.workers.dev/api');
+export const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://qz4gige81pt4u0yx81c5obvc.179.197.255.88.sslip.io/api');
 
 const TASKS_CACHE_KEY = 'foxtask_tasks_cache_v2';
 const CAMPAIGNS_CACHE_KEY = 'foxtask_admin_campaigns_v2';

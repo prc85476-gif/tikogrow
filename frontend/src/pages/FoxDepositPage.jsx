@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://tiko-tg-proxy.prc85476.workers.dev/api');
+const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://qz4gige81pt4u0yx81c5obvc.179.197.255.88.sslip.io/api');
 
 export default function FoxDepositPage() {
   const { setActiveTab, user, setUser, showToast, depositUsdt } = useApp();

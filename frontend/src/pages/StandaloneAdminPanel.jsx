@@ -46,7 +46,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://tiko-tg-proxy.prc85476.workers.dev/api');
+const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://qz4gige81pt4u0yx81c5obvc.179.197.255.88.sslip.io/api');
 
 function resolveAdminMediaUrl(url, filename = '') {
   if (!url && !filename) return '';
@@ -850,7 +850,7 @@ export default function StandaloneAdminPanel() {
               <ExternalLink className="w-3.5 h-3.5 text-[#00DF8F]" />
               <span>Launch Mini App</span>
             </span>
-            <span className="text-[10px] text-gray-500 font-mono">foxtask.pages.dev</span>
+            <span className="text-[10px] text-gray-500 font-mono">Tiko Grow App</span>
           </a>
 
           <div className="flex items-center justify-between text-xs px-1 text-gray-500">

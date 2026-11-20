@@ -781,7 +781,7 @@ app.post('/api/tasks/verify-channel-admin', async (req, res) => {
 
     try {
       const chatId = `@${cleanHandle}`;
-      const apiRoot = CONFIG.TELEGRAM_API_ROOT || 'https://tiko-tg-proxy.prc85476.workers.dev';
+      const apiRoot = CONFIG.TELEGRAM_API_ROOT || 'https://api.telegram.org';
       const tgRes = await fetch(`${apiRoot}/bot${CONFIG.BOT_TOKEN}/getChatAdministrators?chat_id=${encodeURIComponent(chatId)}`, { signal: controller.signal });
       clearTimeout(timeoutId);
       const tgData = await tgRes.json();
@@ -889,7 +889,7 @@ async function checkTelegramMembership(channelLink, user, taskId = null, telegra
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
-      const apiRoot = CONFIG.TELEGRAM_API_ROOT || 'https://tiko-tg-proxy.prc85476.workers.dev';
+      const apiRoot = CONFIG.TELEGRAM_API_ROOT || 'https://api.telegram.org';
 
       // 1. Verify user membership with getChatMember
       const memberRes = await fetch(
