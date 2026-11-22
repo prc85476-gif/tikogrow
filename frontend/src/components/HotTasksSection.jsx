@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import TaskCardItem from './TaskCardItem';
-import { Link2, ChevronDown, Flame, HelpCircle } from 'lucide-react';
+import { Link2, ChevronDown, Flame, HelpCircle, CheckCircle2 } from 'lucide-react';
 
 export default function HotTasksSection() {
   const { tasks, setActiveTab } = useApp();
@@ -55,9 +55,21 @@ export default function HotTasksSection() {
 
       {/* Task Items (First 3 Hot Tasks) */}
       <div className="space-y-2.5">
-        {tasks.slice(0, 3).map((task) => (
-          <TaskCardItem key={task.id} task={task} />
-        ))}
+        {tasks.length === 0 ? (
+          <div className="foxtask-card rounded-2xl p-5 text-center border border-white/5 space-y-1.5">
+            <div className="text-[#00DF8F] font-black text-xs flex items-center justify-center space-x-1.5">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>All Available Tasks Completed!</span>
+            </div>
+            <p className="text-[11px] text-gray-400">
+              No tasks available right now. New tasks will appear here when published!
+            </p>
+          </div>
+        ) : (
+          tasks.slice(0, 3).map((task) => (
+            <TaskCardItem key={task.id} task={task} />
+          ))
+        )}
       </div>
 
       {/* View All Tasks -> */}

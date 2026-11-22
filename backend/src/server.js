@@ -23,7 +23,8 @@ import {
   notifyAdvanceTaskRejected,
   notifyCampaignRemovedRefund,
   notifyDepositConfirmed,
-  notifyAdminBalanceAdjustment
+  notifyAdminBalanceAdjustment,
+  notifyAdsTasksReady
 } from './bot.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1404,4 +1405,22 @@ if (frontendDistPath) {
 app.listen(CONFIG.PORT, () => {
   console.log(`[FoxTask API] Active on port ${CONFIG.PORT} connected to Neon Postgres`);
   initBot();
+
+  // Background worker: check every 60s for expired 24h ads cooldowns and notify users via bot
+  setInterval(async () => {
+    try {
+      await db.resetExpiredAdsUsers(notifyAdsTasksReady);
+    } catch (err) {
+      console.warn('[Ads Reset Worker Warn]:', err.message);
+    }
+  }, 60 * 1000);
+
+  // Run initial check 5s after startup
+  setTimeout(async () => {
+    try {
+      await db.resetExpiredAdsUsers(notifyAdsTasksReady);
+    } catch (err) {
+      console.warn('[Ads Reset Initial Check Warn]:', err.message);
+    }
+  }, 5000);
 });

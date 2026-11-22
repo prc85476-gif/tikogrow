@@ -237,7 +237,7 @@ class Database {
       userRow.ad_completions = {};
       userRow.all_ads_completed_at = null;
       await pool.query("UPDATE users SET ad_completions = '{}'::jsonb, all_ads_completed_at = NULL WHERE id = $1", [id]);
-      await pool.query("DELETE FROM task_completions WHERE user_id = $1 AND task_id LIKE 'task_ad_%'", [id]);
+      await pool.query("DELETE FROM task_completions WHERE user_id = $1 AND (task_id LIKE 'task_ad_%' OR task_id IN (SELECT id FROM tasks WHERE category = 'ads' OR type = 'ad'))", [id]);
     } else {
       let changed = false;
       for (const [adId, ts] of Object.entries(adCompletions)) {
@@ -325,6 +325,62 @@ class Database {
   }
 
   // 2. Tasks
+  async resetExpiredAdsUsers(notifyCallback) {
+    await this.initPromise;
+    const COOLDOWN_24H = 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - COOLDOWN_24H;
+
+    try {
+      // Find all users whose 24h ads cooldown has expired
+      const res = await pool.query(
+        `SELECT id, username, first_name, photo_url 
+         FROM users 
+         WHERE all_ads_completed_at IS NOT NULL AND all_ads_completed_at <= $1`,
+        [cutoff]
+      );
+
+      if (res.rows.length === 0) return 0;
+
+      console.log(`[Ads Cooldown Engine] Found ${res.rows.length} users ready for 24h ads reset.`);
+
+      for (const user of res.rows) {
+        // Atomic update to ensure exactly-once execution
+        const updateRes = await pool.query(
+          `UPDATE users 
+           SET ad_completions = '{}'::jsonb, all_ads_completed_at = NULL 
+           WHERE id = $1 AND all_ads_completed_at IS NOT NULL
+           RETURNING id`,
+          [user.id]
+        );
+
+        if (updateRes.rows.length > 0) {
+          // Remove ad completion records for this user
+          await pool.query(
+            `DELETE FROM task_completions 
+             WHERE user_id = $1 AND (task_id LIKE 'task_ad_%' OR task_id IN (SELECT id FROM tasks WHERE category = 'ads' OR type = 'ad'))`,
+            [user.id]
+          );
+
+          console.log(`[Ads Cooldown Engine] Reset ads tasks for user ${user.id} (${user.username || 'Member'}).`);
+
+          // Deliver bot reminder message with "Complete Tasks" button
+          if (typeof notifyCallback === 'function') {
+            try {
+              await notifyCallback(user.id, user);
+            } catch (notifyErr) {
+              console.warn(`[Ads Cooldown Engine] Notify failed for user ${user.id}:`, notifyErr.message);
+            }
+          }
+        }
+      }
+
+      return res.rows.length;
+    } catch (err) {
+      console.error('[Ads Cooldown Engine Error]:', err.message);
+      return 0;
+    }
+  }
+
   async getTasks(userId = 'guest_user') {
     await this.initPromise;
     const user = await this.getUser(userId);
@@ -378,9 +434,24 @@ class Database {
       [String(userId)]
     );
 
-    // Return tasks with completed state; completed tasks stay visible with DONE status until daily reset
-    const list = taskRes.rows.map((t) => formatTask(t, completedList.includes(t.id)));
+    // Filter out ANY task that has been completed by this user!
+    // Completed tasks disappear immediately from the user's task list!
+    const activeTasks = taskRes.rows.filter((t) => {
+      // 1. If user already completed this task, exclude it!
+      if (completedList.includes(t.id)) {
+        return false;
+      }
+      // 2. If it's an ad task and recorded in adCompletions within 24h, exclude it!
+      const isAd = t.category === 'ads' || t.type === 'ad' || String(t.id).startsWith('task_ad_');
+      if (isAd && user.adCompletions && user.adCompletions[t.id]) {
+        if (now - Number(user.adCompletions[t.id]) < COOLDOWN_24H) {
+          return false;
+        }
+      }
+      return true;
+    });
 
+    const list = activeTasks.map((t) => formatTask(t, false));
     return list;
   }
 

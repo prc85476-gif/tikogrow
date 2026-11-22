@@ -84,25 +84,39 @@ function filterActiveTasks(taskList, userObj) {
 
   const base = Array.isArray(taskList) && taskList.length > 0 ? taskList : DEFAULT_TASKS;
 
-  // Filter out tasks that reached maximum participant limit or were marked completed
+  // Filter out:
+  // 1. Tasks that reached maximum participant limit or status completed/ended
+  // 2. Tasks ALREADY COMPLETED by the user (they must disappear!)
   const filtered = base.filter((task) => {
     if (task.status === 'completed' || task.status === 'ended') return false;
     if (task.participants > 0 && (task.joinedMembers || 0) >= task.participants) return false;
-    return true;
-  }).map((task) => {
-    const isAd = task.category === 'ads' || task.type === 'ad' || task.id?.startsWith('task_ad_');
-    let isCompleted = completedList.includes(task.id);
+
+    const isAd = task.category === 'ads' || task.type === 'ad' || String(task.id || '').startsWith('task_ad_');
     if (isAd) {
       if (isAllAds24hPassed) {
-        isCompleted = false;
-      } else {
-        const adTime = adCompletions[task.id];
-        isCompleted = Boolean(adTime && (now - Number(adTime) < COOLDOWN_24H));
+        return true; // 24h passed, all ads are available again!
       }
+      // If user completed this ad within 24h, hide it!
+      const adTime = adCompletions[task.id];
+      if (adTime && (now - Number(adTime) < COOLDOWN_24H)) {
+        return false;
+      }
+      if (completedList.includes(task.id)) {
+        return false;
+      }
+      return true;
     }
+
+    // Standard task: if completed by user, hide it!
+    if (completedList.includes(task.id) || task.completed) {
+      return false;
+    }
+
+    return true;
+  }).map((task) => {
     return {
       ...task,
-      completed: isCompleted
+      completed: false
     };
   });
 
@@ -269,9 +283,10 @@ export function AppProvider({ children }) {
   const [adminAdvanceSubmissions, setAdminAdvanceSubmissions] = useState([]);
   const [activeAdvanceModalTask, setActiveAdvanceModalTask] = useState(null);
   const initialTab = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') || 'home' : 'home';
+  const initialCat = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('cat') || 'ALL' : 'ALL';
   const [activeTab, setActiveTab] = useState(initialTab); // 'home' | 'tasks' | 'activity' | 'profile' | 'add-task' | 'deposit'
   const [currentWithdrawAlertIndex, setCurrentWithdrawAlertIndex] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState(initialCat);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
   const [taskSuccessModal, setTaskSuccessModal] = useState({ visible: false, task: null });
@@ -1233,24 +1248,11 @@ export function AppProvider({ children }) {
           localStorage.setItem('foxtask_user_cache', JSON.stringify(data.user));
         } catch {}
 
-        if (isAd) {
-          if (data.task && (data.task.status === 'completed' || (data.task.participants > 0 && data.task.joinedMembers >= data.task.participants))) {
-            setTasks((prev) => prev.filter((t) => t.id !== task.id));
-          } else {
-            setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...(data.task || {}), completed: true } : t)));
-          }
-        } else if (data.task) {
-          if (data.task.status === 'completed' || (data.task.participants > 0 && data.task.joinedMembers >= data.task.participants)) {
-            // Task has reached completion limit -> remove from active tasks immediately!
-            setTasks((prev) => prev.filter((t) => t.id !== task.id));
-          } else {
-            setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...data.task, completed: true } : t)));
-          }
-        } else {
-          setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: true, joinedMembers: (t.joinedMembers || 0) + 1 } : t)));
-        }
+        // Completed task immediately disappears from user's active task list!
+        setTasks((prev) => prev.filter((t) => t.id !== task.id));
         triggerConfetti();
         setTaskSuccessModal({ visible: true, task });
+        showToast(`Task Complete! +$${Number(task.usdtReward || 0.01).toFixed(3)} USDT`, 'success');
         fetchTasks(user.id);
         return { success: true };
       } else if (res && !res.ok) {
@@ -1297,17 +1299,8 @@ export function AppProvider({ children }) {
       localStorage.setItem('foxtask_user_cache', JSON.stringify(updatedUser));
     } catch {}
 
-    if (isAd) {
-      setTasks((prev) => prev.filter((t) => t.id !== task.id));
-    } else {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id
-            ? { ...t, completed: true, joinedMembers: (t.joinedMembers || 0) + 1 }
-            : t
-        )
-      );
-    }
+    // Remove completed task immediately from active list
+    setTasks((prev) => prev.filter((t) => t.id !== task.id));
 
     triggerConfetti();
     setTaskSuccessModal({ visible: true, task });

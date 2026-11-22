@@ -5,6 +5,7 @@ import { Search, RotateCw, CheckCircle2, Clock, Sparkles, Check } from 'lucide-r
 
 export default function FoxTasksPage() {
   const {
+    user,
     tasks,
     fetchTasks,
     advanceTasks,
@@ -16,6 +17,34 @@ export default function FoxTasksPage() {
   } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [adsTimeLeft, setAdsTimeLeft] = useState('');
+
+  // Live ticking countdown for 24-hour Ads cooldown
+  useEffect(() => {
+    const calculateCountdown = () => {
+      const COOLDOWN_24H = 24 * 60 * 60 * 1000;
+      const baseTime = user?.allAdsCompletedAt ? Number(user.allAdsCompletedAt) : null;
+      if (!baseTime) {
+        setAdsTimeLeft('24:00:00');
+        return;
+      }
+      const diff = (baseTime + COOLDOWN_24H) - Date.now();
+      if (diff <= 0) {
+        setAdsTimeLeft('00:00:00');
+        if (fetchTasks) fetchTasks();
+        return;
+      }
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      setAdsTimeLeft(formatted);
+    };
+
+    calculateCountdown();
+    const timer = setInterval(calculateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [user?.allAdsCompletedAt, fetchTasks]);
 
   useEffect(() => {
     if (fetchTasks) fetchTasks();
@@ -57,6 +86,8 @@ export default function FoxTasksPage() {
 
   const filteredAdvanceTasks = (advanceTasks || []).filter((task) => {
     if (!isAdvanceCategory) return false;
+    // Exclude approved advance tasks
+    if (task.userSubmission?.status === 'approved') return false;
     const matchesSearch = (task.title || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
@@ -288,43 +319,45 @@ export default function FoxTasksPage() {
       ) : (
         /* 2. For standard categories (ALL, TELEGRAM, TWITTER, TIKTOK, ADS): ONLY show standard tasks */
         <div className="space-y-2.5 pt-1">
-          {selectedCategory === 'ads' && filteredTasks.length > 0 && filteredTasks.every((t) => t.completed) && (
-            <div className="foxtask-card rounded-3xl p-5 text-center border border-emerald-500/30 bg-emerald-500/10 space-y-2 mb-2">
-              <div className="flex items-center justify-center space-x-2 text-[#00DF8F] font-black text-sm">
-                <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
-                <span>All Daily Video Ads Completed! 🎉</span>
-              </div>
-              <p className="text-xs text-gray-300 max-w-xs mx-auto leading-relaxed">
-                You've completed all ads! The 24-hour cycle will reset all ads together so you can earn again tomorrow.
-              </p>
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-black/50 border border-amber-500/30 text-xs font-mono text-amber-400">
-                <Clock className="w-3.5 h-3.5" />
-                <span>24-Hour Reset Countdown Active</span>
-              </div>
-            </div>
-          )}
-
           {filteredTasks.length === 0 ? (
             selectedCategory === 'ads' ? (
-              <div className="foxtask-card rounded-3xl p-7 text-center border border-white/5 space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-[#00DF8F]/10 border border-[#00DF8F]/20 flex items-center justify-center text-[#00DF8F] mx-auto shadow-inner">
-                  <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
+              <div className="foxtask-card rounded-3xl p-7 text-center border border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 via-[#12151D] to-[#12151D] space-y-4 shadow-xl">
+                <div className="w-16 h-16 rounded-3xl bg-[#00DF8F]/15 border border-[#00DF8F]/30 flex items-center justify-center text-[#00DF8F] mx-auto shadow-lg shadow-[#00DF8F]/10">
+                  <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
                 </div>
                 <div>
-                  <h4 className="text-base font-black text-white">All Daily Ads Completed!</h4>
-                  <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                    You have watched all available video ads. Fresh ads unlock automatically every 24 hours. Check back tomorrow!
+                  <h4 className="text-base font-black text-white">All Daily Ads Completed! 🎉</h4>
+                  <p className="text-xs text-gray-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
+                    You have watched all available video ads. Fresh ads unlock automatically every 24 hours. The Telegram bot will notify you when ads are back!
                   </p>
                 </div>
-                <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-amber-500/20 text-xs font-mono text-amber-400">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>24-Hour Cooldown Active</span>
+
+                <div className="bg-black/60 border border-amber-500/30 rounded-2xl p-4 max-w-xs mx-auto space-y-1.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400/80 flex items-center justify-center space-x-1.5">
+                    <Clock className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
+                    <span>Next Ads Reset In</span>
+                  </div>
+                  <div className="text-2xl font-black font-mono text-amber-400 tracking-wider">
+                    {adsTimeLeft || '24:00:00'}
+                  </div>
+                  <div className="text-[10px] text-gray-500 font-medium">
+                    24-Hour Cooldown Active • Auto-notification on Bot
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="foxtask-card rounded-2xl p-8 text-center text-gray-400">
-                <p className="text-sm font-bold">No tasks found</p>
-                <p className="text-xs text-gray-500 mt-1">Try selecting another filter</p>
+              <div className="foxtask-card rounded-3xl p-8 text-center border border-white/5 space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-[#FF6128]/10 border border-[#FF6128]/20 flex items-center justify-center text-[#FF6128] mx-auto shadow-inner">
+                  <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="text-base font-black text-white">No Tasks Available</h4>
+                  <p className="text-xs text-gray-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
+                    {searchQuery
+                      ? 'No tasks match your search query.'
+                      : "You've completed all available tasks! New tasks will appear here as soon as they are published."}
+                  </p>
+                </div>
               </div>
             )
           ) : (

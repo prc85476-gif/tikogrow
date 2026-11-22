@@ -11,7 +11,7 @@ const BANNER_IMAGE_PATH = path.join(__dirname, 'assets', 'tiko_banner.jpg');
 
 let botInstance = null;
 
-export function getWebAppUrlForUser(userOrChatId, userMeta = {}) {
+export function getWebAppUrlForUser(userOrChatId, userMeta = {}, extraParams = '') {
   const base = CONFIG.WEBAPP_URL || 'https://qz4gige81pt4u0yx81c5obvc.179.197.255.88.sslip.io';
   if (!userOrChatId) return base;
   const id = typeof userOrChatId === 'object' ? userOrChatId.id : userOrChatId;
@@ -21,6 +21,9 @@ export function getWebAppUrlForUser(userOrChatId, userMeta = {}) {
   let url = `${base}${sep}tg_id=${id}`;
   if (name) url += `&tg_name=${encodeURIComponent(name)}`;
   if (username) url += `&tg_user=${encodeURIComponent(username)}`;
+  if (extraParams) {
+    url += extraParams.startsWith('&') ? extraParams : `&${extraParams}`;
+  }
   return url;
 }
 
@@ -760,6 +763,34 @@ _Tap below to check your wallet in Tiko Grow:_
 
   const keyboard = Markup.inlineKeyboard([
     [Markup.button.webApp('🚀 Open Tiko Grow', getWebAppUrlForUser(userId))]
+  ]);
+
+  return sendTelegramMessage(userId, text, keyboard);
+}
+
+// 13. Ads Tasks 24-Hour Reset Notification
+export async function notifyAdsTasksReady(userId, userMeta = {}) {
+  if (!userId) return false;
+
+  const firstName = userMeta?.firstName || userMeta?.first_name || '';
+  const safeName = firstName ? ` *${String(firstName).replace(/[*_`\[\]]/g, '')}*, ` : ' ';
+
+  const text = `
+🎯 *Your Ads Tasks Are Ready Again!* 🎬
+
+Hello${safeName}your 24-hour video ads cooldown is complete! Fresh video ads are now ready for you to watch and earn rewards.
+
+💰 *Watch & Earn:* Instant USDT & ${CONFIG.COIN_NAME} tokens for each completed ad!
+
+_Tap the button below to complete your ads tasks now:_
+  `.trim();
+
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.webApp('🚀 Complete Tasks', getWebAppUrlForUser(userId, userMeta, 'tab=tasks&cat=ads'))],
+    [
+      Markup.button.url('📢 Task Updates', 'https://t.me/AirdropIdentifyOfficial'),
+      Markup.button.url('💬 Discussion', 'https://t.me/picassopayout')
+    ]
   ]);
 
   return sendTelegramMessage(userId, text, keyboard);
