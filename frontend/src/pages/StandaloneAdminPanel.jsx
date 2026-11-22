@@ -308,7 +308,8 @@ export default function StandaloneAdminPanel() {
     fgReward: 15,
     participants: 100,
     isVerified: true,
-    hasGlobe: false
+    hasGlobe: false,
+    badge: 'auto'
   });
 
   // Campaigns & Withdrawals filters
@@ -479,7 +480,8 @@ export default function StandaloneAdminPanel() {
       fgReward: 15,
       participants: 100,
       isVerified: true,
-      hasGlobe: false
+      hasGlobe: false,
+      badge: 'auto'
     });
     setIsTaskModalOpen(true);
   };
@@ -494,7 +496,8 @@ export default function StandaloneAdminPanel() {
       fgReward: task.fgReward !== undefined ? task.fgReward : 15,
       participants: task.participants || 100,
       isVerified: Boolean(task.isVerified || task.id?.startsWith('task_official')),
-      hasGlobe: Boolean(task.hasGlobe)
+      hasGlobe: Boolean(task.hasGlobe),
+      badge: task.badge || 'auto'
     });
     setIsTaskModalOpen(true);
   };
@@ -1499,8 +1502,8 @@ export default function StandaloneAdminPanel() {
                             </div>
                           </div>
 
-                          {/* Reward Badges */}
-                          <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-white/5 text-xs font-mono font-black">
+                          {/* Reward Badges & Badge Indicator */}
+                          <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-white/5 text-xs font-mono font-black flex-wrap gap-y-1">
                             <span className="text-[#00DF8F] flex items-center space-x-1 bg-[#00DF8F]/10 px-2 py-0.5 rounded-lg">
                               <img src="/usdt.png" alt="USDT" className="w-3.5 h-3.5 rounded-full" />
                               <span>+${Number(t.usdtReward || 0.015).toFixed(3)}</span>
@@ -1508,6 +1511,13 @@ export default function StandaloneAdminPanel() {
                             <span className="text-amber-400 flex items-center space-x-1 bg-amber-400/10 px-2 py-0.5 rounded-lg">
                               <img src="/fn_coin.png" alt="FN" className="w-3.5 h-3.5 rounded-full" />
                               <span>+{t.fgReward || 15} FN</span>
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase ${
+                              t.badge === 'limited' || (t.badge !== 'new' && (t.joinedMembers || 0) >= (t.participants || 100) * 0.5)
+                                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                                : 'bg-[#FF6128]/15 text-[#FF6128] border border-[#FF6128]/30'
+                            }`}>
+                              {t.badge === 'limited' ? '⚡ Limited' : t.badge === 'new' ? '✦ New' : (t.joinedMembers || 0) >= (t.participants || 100) * 0.5 ? '⚡ Limited' : '✦ New'}
                             </span>
                           </div>
 
@@ -3155,6 +3165,26 @@ export default function StandaloneAdminPanel() {
                 />
                 <p className="text-[10px] text-gray-400 mt-1">
                   ⚡ When <span className="text-amber-400 font-bold">{taskForm.participants || 20}</span> users complete this task, it will automatically end and disappear from the bot/mini app.
+                </p>
+              </div>
+
+              {/* Task Badge Override Setting */}
+              <div className="bg-black/50 border border-white/10 rounded-xl p-3.5">
+                <label className="text-[11px] font-black tracking-wider uppercase text-gray-300 block mb-1.5 flex items-center space-x-1.5">
+                  <span className="text-[#FF6128]">✦</span>
+                  <span>Task Badge Setting</span>
+                </label>
+                <select
+                  value={taskForm.badge || 'auto'}
+                  onChange={(e) => setTaskForm({ ...taskForm, badge: e.target.value })}
+                  className="w-full bg-[#18181b] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none font-medium focus:border-[#FF6128]"
+                >
+                  <option value="auto">Auto (✦ New Task, turns ⚡ Limited at 50% joined)</option>
+                  <option value="new">Force "✦ New Task"</option>
+                  <option value="limited">Force "⚡ Limited"</option>
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Default is Auto: new tasks show ✦ New Task, and dynamically switch to ⚡ Limited when 50% of participant limit is reached.
                 </p>
               </div>
 

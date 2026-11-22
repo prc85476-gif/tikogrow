@@ -66,9 +66,9 @@ export default function FoxTasksPage() {
   const filterCategories = [
     { id: 'ALL', label: 'ALL', icon: null },
     { id: 'telegram', label: 'TELEGRAM', icon: <img src="/telegram_logo.png" alt="TG" className="w-3.5 h-3.5 rounded-sm inline mr-1 object-contain" /> },
-    { id: 'twitter', label: 'TWITTER', icon: <img src="/x_logo.png" alt="X" className="w-3.5 h-3.5 rounded-sm inline mr-1 object-contain" /> },
-    { id: 'tiktok', label: 'TIKTOK', icon: <span className="font-sans text-xs mr-1">♪</span> },
     { id: 'ads', label: 'ADS', icon: <img src="/ads_logo.png" alt="ADS" className="w-3.5 h-3.5 rounded-sm inline mr-1 object-contain" /> },
+    { id: 'twitter', label: 'X', icon: <img src="/x_logo.png" alt="X" className="w-3.5 h-3.5 rounded-sm inline mr-1 object-contain" /> },
+    { id: 'tiktok', label: 'TIKTOK', icon: <span className="font-sans text-xs mr-1">♪</span> },
     { id: 'advance', label: '⚡ ADVANCE', icon: <span className="mr-1 text-amber-400">⚡</span> }
   ];
 

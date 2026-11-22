@@ -50,6 +50,8 @@ export async function runMigration() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS total_won_amount NUMERIC(14, 2) DEFAULT 0.00;
       CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by);
 
+      ALTER TABLE tasks ADD COLUMN IF NOT EXISTS badge VARCHAR(50) DEFAULT 'auto';
+
       CREATE TABLE IF NOT EXISTS aviator_bets (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR(255) NOT NULL,

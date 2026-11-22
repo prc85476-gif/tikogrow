@@ -67,6 +67,7 @@ function formatTask(row, completed = false) {
     code: row.code || '',
     category: row.category || 'telegram',
     type: row.type || row.category || 'telegram',
+    badge: row.badge || 'auto',
     link: row.link || '',
     description: row.description || '',
     status: row.status || 'approved',
@@ -545,8 +546,8 @@ class Database {
         INSERT INTO tasks (
           id, creator_id, title, is_verified, has_globe, usdt_reward, fg_reward,
           total_cost_usdt, participants, joined_members, joined_user_ids,
-          code, category, type, link, description, status, created_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,NOW())
+          code, category, type, link, description, status, badge, created_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW())
         RETURNING *
       `, [
         taskId, userId, taskData.title?.trim() || 'New Sponsored Task',
@@ -554,7 +555,7 @@ class Database {
         usdtReward, fgReward, totalCostUsdt, targetMembers, 0,
         JSON.stringify([]), code, taskData.category || 'telegram',
         taskData.category || 'telegram', taskData.link?.trim() || 'https://t.me',
-        taskData.description?.trim() || '', status
+        taskData.description?.trim() || '', status, taskData.badge || 'auto'
       ]);
 
       await client.query('COMMIT');
@@ -670,8 +671,8 @@ class Database {
       INSERT INTO tasks (
         id, creator_id, title, is_verified, has_globe, usdt_reward, fg_reward,
         total_cost_usdt, participants, joined_members, joined_user_ids,
-        code, category, type, link, description, status, created_at
-      ) VALUES ($1, 'admin', $2, $3, $4, $5, $6, $7, $8, 0, '[]'::jsonb, $9, $10, $11, $12, $13, 'approved', NOW())
+        code, category, type, link, description, status, badge, created_at
+      ) VALUES ($1, 'admin', $2, $3, $4, $5, $6, $7, $8, 0, '[]'::jsonb, $9, $10, $11, $12, $13, 'approved', $14, NOW())
       RETURNING *
     `, [
       taskId,
@@ -686,7 +687,8 @@ class Database {
       taskData.category || 'telegram',
       taskData.type || taskData.category || 'telegram',
       taskData.link?.trim() || '',
-      taskData.description?.trim() || ''
+      taskData.description?.trim() || '',
+      taskData.badge || 'auto'
     ]);
 
     return formatTask(res.rows[0]);
@@ -732,6 +734,10 @@ class Database {
       fields.push(`type = $${idx++}`);
       values.push(taskData.category);
     }
+    if (taskData.badge !== undefined) {
+      fields.push(`badge = $${idx++}`);
+      values.push(taskData.badge);
+    }
 
     if (fields.length === 0) return this.getTask(taskId);
 
@@ -749,6 +755,29 @@ class Database {
       [status, taskId]
     );
     if (!res.rows[0]) throw new Error('Task not found');
+    return formatTask(res.rows[0]);
+  }
+
+  async setTaskBadge(codeOrId, badge) {
+    await this.initPromise;
+    let clean = String(codeOrId || '').trim();
+    const validBadge = ['new', 'limited', 'auto'].includes(String(badge).toLowerCase())
+      ? String(badge).toLowerCase()
+      : 'auto';
+
+    let res = await pool.query(
+      `UPDATE tasks SET badge = $1 WHERE id = $2 OR LOWER(code) = LOWER($2) RETURNING *`,
+      [validBadge, clean]
+    );
+
+    if (res.rows.length === 0 && !clean.startsWith('#')) {
+      res = await pool.query(
+        `UPDATE tasks SET badge = $1 WHERE LOWER(code) = LOWER($2) RETURNING *`,
+        [validBadge, '#' + clean]
+      );
+    }
+
+    if (res.rows.length === 0) return null;
     return formatTask(res.rows[0]);
   }
 

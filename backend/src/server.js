@@ -446,6 +446,17 @@ app.post('/api/admin/tasks/toggle-status', async (req, res) => {
   }
 });
 
+app.post('/api/admin/tasks/set-badge', async (req, res) => {
+  const { taskId, badge } = req.body;
+  try {
+    const task = await db.setTaskBadge(taskId, badge);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+    res.json({ success: true, task });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.post('/api/admin/tasks/delete', async (req, res) => {
   const { taskId } = req.body;
   try {

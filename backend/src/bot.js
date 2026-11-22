@@ -143,14 +143,83 @@ _Tap the button below to launch the Mini App:_
     });
 
     bot.command('help', (ctx) => {
+      const fromId = String(ctx.from?.id);
+      const isAdmin = fromId === '5977573271';
       return ctx.replyWithMarkdown(
         `*Tiko Grow Help & Support*\n\n` +
         `• /start - Launch main interaction interface\n` +
         `• /balance - View token balances and valuation\n` +
-        `• /help - Assistance and support links\n\n` +
-        `📢 Updates: ${CONFIG.OFFICIAL_CHANNEL || 'https://t.me/AirdropIdentifyOfficial'}\n` +
+        `• /help - Assistance and support links\n` +
+        (isAdmin ? `\n👑 *Admin Commands:*\n• \`/setbadge <#code> <new|limited|auto>\`\n• \`/limit <#code>\` - Set badge to Limited\n• \`/newtask <#code>\` - Set badge to New Task\n` : '') +
+        `\n📢 Updates: ${CONFIG.OFFICIAL_CHANNEL || 'https://t.me/AirdropIdentifyOfficial'}\n` +
         `💬 Discussion: https://t.me/picassopayout`
       );
+    });
+
+    // Admin Task Badge Command (/setbadge <#code or taskId> <new|limited|auto>)
+    bot.command(['setbadge', 'badge'], async (ctx) => {
+      try {
+        const fromId = String(ctx.from?.id);
+        if (fromId !== '5977573271') return ctx.reply('⚠️ Unauthorized: Admin only.');
+        const parts = ctx.message.text.trim().split(/\s+/).slice(1);
+        if (parts.length < 2) {
+          return ctx.replyWithMarkdown(
+            `*Usage:*\n\`/setbadge <#code or taskId> <new|limited|auto>\`\n\n*Examples:*\n\`/setbadge #1 limited\`\n\`/setbadge #1 new\`\n\`/setbadge #1 auto\``
+          );
+        }
+        const [target, badge] = parts;
+        const cleanBadge = badge.toLowerCase();
+        if (!['new', 'limited', 'auto'].includes(cleanBadge)) {
+          return ctx.reply('❌ Invalid badge! Choose: new, limited, or auto');
+        }
+        const updated = await db.setTaskBadge(target, cleanBadge);
+        if (!updated) {
+          return ctx.reply(`❌ Task "${target}" not found.`);
+        }
+        return ctx.replyWithMarkdown(
+          `✅ *Task Badge Updated!*\n\n` +
+          `📋 *Task:* ${updated.title} (${updated.code || updated.id})\n` +
+          `🏷️ *New Badge:* \`${cleanBadge.toUpperCase()}\``
+        );
+      } catch (err) {
+        return ctx.reply(`❌ Error: ${err.message}`);
+      }
+    });
+
+    // Quick shortcut: /limit <#code or taskId>
+    bot.command('limit', async (ctx) => {
+      try {
+        const fromId = String(ctx.from?.id);
+        if (fromId !== '5977573271') return ctx.reply('⚠️ Unauthorized: Admin only.');
+        const parts = ctx.message.text.trim().split(/\s+/).slice(1);
+        if (parts.length < 1) {
+          return ctx.replyWithMarkdown(`*Usage:* \`/limit <#code or taskId>\`\n*Example:* \`/limit #1\``);
+        }
+        const target = parts[0];
+        const updated = await db.setTaskBadge(target, 'limited');
+        if (!updated) return ctx.reply(`❌ Task "${target}" not found.`);
+        return ctx.replyWithMarkdown(`⚡ Task *${updated.title}* (${updated.code || updated.id}) badge set to *LIMITED*!`);
+      } catch (err) {
+        return ctx.reply(`❌ Error: ${err.message}`);
+      }
+    });
+
+    // Quick shortcut: /newtask <#code or taskId>
+    bot.command('newtask', async (ctx) => {
+      try {
+        const fromId = String(ctx.from?.id);
+        if (fromId !== '5977573271') return ctx.reply('⚠️ Unauthorized: Admin only.');
+        const parts = ctx.message.text.trim().split(/\s+/).slice(1);
+        if (parts.length < 1) {
+          return ctx.replyWithMarkdown(`*Usage:* \`/newtask <#code or taskId>\`\n*Example:* \`/newtask #1\``);
+        }
+        const target = parts[0];
+        const updated = await db.setTaskBadge(target, 'new');
+        if (!updated) return ctx.reply(`❌ Task "${target}" not found.`);
+        return ctx.replyWithMarkdown(`✦ Task *${updated.title}* (${updated.code || updated.id}) badge set to *NEW TASK*!`);
+      } catch (err) {
+        return ctx.reply(`❌ Error: ${err.message}`);
+      }
     });
 
     // 1. Channel post event (bot is admin and post is published in channel)

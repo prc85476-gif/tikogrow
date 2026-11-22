@@ -82,7 +82,7 @@ function filterActiveTasks(taskList, userObj) {
   const allAdsCompletedAt = userObj?.allAdsCompletedAt ? Number(userObj.allAdsCompletedAt) : null;
   const isAllAds24hPassed = allAdsCompletedAt && (now - allAdsCompletedAt >= COOLDOWN_24H);
 
-  const base = Array.isArray(taskList) && taskList.length > 0 ? taskList : DEFAULT_TASKS;
+  const base = Array.isArray(taskList) ? taskList : [];
 
   // Filter out:
   // 1. Tasks that reached maximum participant limit or status completed/ended
@@ -262,16 +262,16 @@ export function AppProvider({ children }) {
   const [tasks, setTasks] = useState(() => {
     try {
       const cached = localStorage.getItem(TASKS_CACHE_KEY);
-      if (cached) {
+      if (cached !== null) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           // Exclude any legacy test tasks
           const clean = parsed.filter(t => !t.id?.startsWith('task_17942'));
           return filterActiveTasks(clean, user);
         }
       }
     } catch {}
-    return filterActiveTasks(DEFAULT_TASKS, user);
+    return [];
   });
   const [referralMilestones, setReferralMilestones] = useState([
     { id: 'ref_10', required: 10, usdtReward: 0.02, fgReward: 0, title: '10 Active Referrals', claimed: false },
@@ -367,12 +367,12 @@ export function AppProvider({ children }) {
       const stored = localStorage.getItem(CAMPAIGNS_CACHE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed.filter(c => !c.id?.startsWith('camp_usr_') && !c.id?.startsWith('task_17942'));
         }
       }
     } catch {}
-    return [...DEFAULT_TASKS];
+    return [];
   });
 
   const adminApproveCampaign = (taskId) => {
@@ -1198,7 +1198,7 @@ export function AppProvider({ children }) {
     // Offline / Network Error Fallback - ONLY if no tasks exist in memory
     setTasks((prev) => {
       if (prev && prev.length > 0) return prev;
-      return filterActiveTasks(DEFAULT_TASKS, user);
+      return [];
     });
   };
 

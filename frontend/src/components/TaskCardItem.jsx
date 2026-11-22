@@ -20,6 +20,14 @@ export default function TaskCardItem({ task }) {
     task.title?.toLowerCase().includes('video ad') ||
     task.title?.toLowerCase().includes('sponsor ad');
 
+  // Dynamic Badge Calculation:
+  // If task has explicit badge override ('new' or 'limited'), honor it.
+  // Otherwise auto: if 50% completed (joined >= participants * 0.5), show 'Limited', else 'New Task'.
+  const joinedMembers = Number(task.joinedMembers || 0);
+  const participantsTarget = Number(task.participants || 100);
+  const isHalfCompleted = participantsTarget > 0 && joinedMembers >= (participantsTarget * 0.5);
+  const isLimited = task.badge === 'limited' || (task.badge !== 'new' && isHalfCompleted);
+
   const handleAction = async () => {
     if (task.completed || isVerifying || isPlayingAd) return;
 
@@ -175,43 +183,59 @@ export default function TaskCardItem({ task }) {
         </div>
       </div>
 
-      {/* Right Action Button */}
-      <button
-        onClick={handleAction}
-        disabled={task.completed || isVerifying || isPlayingAd}
-        className={`min-w-[72px] px-3.5 py-2.5 rounded-2xl text-xs font-black tracking-wider uppercase cursor-pointer transition-all flex items-center justify-center ${
-          task.completed
-            ? 'bg-gray-800 text-[#00DF8F] border border-[#00DF8F]/30 cursor-default flex items-center space-x-1'
-            : isPlayingAd
-            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-            : (isTelegram && isJoinedClicked) || (isAd && adStep === 2)
-            ? 'bg-[#00DF8F] hover:bg-[#00DF8F]/90 text-black shadow-lg shadow-[#00DF8F]/20 active:scale-95'
-            : 'btn-orange-3d shadow-md'
-        }`}
-      >
-        {task.completed ? (
-          <>
-            <Check className="w-3.5 h-3.5 stroke-[3]" />
-            <span>DONE</span>
-          </>
-        ) : isPlayingAd ? (
-          <span className="flex items-center space-x-1">
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
-            <span>PLAYING</span>
-          </span>
-        ) : isVerifying ? (
-          <span className="flex items-center space-x-1">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>CHECKING</span>
-          </span>
-        ) : isTelegram ? (
-          isJoinedClicked ? 'CHECK' : 'START'
-        ) : isAd ? (
-          adStep === 2 ? 'CLAIM' : 'START'
-        ) : (
-          'START'
+      {/* Right Action Button & Dynamic Badge */}
+      <div className="flex flex-col items-end shrink-0 ml-2 space-y-1.5">
+        {!task.completed && (
+          isLimited ? (
+            <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[9px] font-black uppercase tracking-wider leading-none shadow-sm flex items-center space-x-1">
+              <span className="text-[10px] leading-none">⚡</span>
+              <span>Limited</span>
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-md bg-[#FF6128]/15 border border-[#FF6128]/35 text-[#FF6128] text-[9px] font-black uppercase tracking-wider leading-none shadow-sm flex items-center space-x-1">
+              <span className="text-[10px] leading-none">✦</span>
+              <span>New Task</span>
+            </span>
+          )
         )}
-      </button>
+
+        <button
+          onClick={handleAction}
+          disabled={task.completed || isVerifying || isPlayingAd}
+          className={`min-w-[72px] px-3.5 py-2.5 rounded-2xl text-xs font-black tracking-wider uppercase cursor-pointer transition-all flex items-center justify-center ${
+            task.completed
+              ? 'bg-gray-800 text-[#00DF8F] border border-[#00DF8F]/30 cursor-default flex items-center space-x-1'
+              : isPlayingAd
+              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+              : (isTelegram && isJoinedClicked) || (isAd && adStep === 2)
+              ? 'bg-[#00DF8F] hover:bg-[#00DF8F]/90 text-black shadow-lg shadow-[#00DF8F]/20 active:scale-95'
+              : 'btn-orange-3d shadow-md'
+          }`}
+        >
+          {task.completed ? (
+            <>
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+              <span>DONE</span>
+            </>
+          ) : isPlayingAd ? (
+            <span className="flex items-center space-x-1">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+              <span>PLAYING</span>
+            </span>
+          ) : isVerifying ? (
+            <span className="flex items-center space-x-1">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>CHECKING</span>
+            </span>
+          ) : isTelegram ? (
+            isJoinedClicked ? 'CHECK' : 'START'
+          ) : isAd ? (
+            adStep === 2 ? 'CLAIM' : 'START'
+          ) : (
+            'START'
+          )}
+        </button>
+      </div>
     </div>
   );
 }
