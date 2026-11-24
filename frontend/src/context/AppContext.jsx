@@ -1354,32 +1354,6 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Admin Approve Task (For testing & upcoming admin panel)
-  const approveTask = async (taskId) => {
-    try {
-      const res = await fetch(`${API_BASE}/admin/tasks/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId })
-      }).catch(() => null);
-
-      if (res && res.ok) {
-        setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: 'approved' } : t)));
-        triggerConfetti();
-        showToast('Campaign Approved! Now Live to Public Members.', 'success');
-        return true;
-      } else {
-        setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: 'approved' } : t)));
-        triggerConfetti();
-        showToast('Campaign Approved! Now Live to Public Members.', 'success');
-        return true;
-      }
-    } catch {
-      showToast('Error approving campaign', 'error');
-      return false;
-    }
-  };
-
   // Simulate user joining a campaign
   const simulateJoinTask = async (taskId) => {
     try {
@@ -1726,7 +1700,6 @@ export function AppProvider({ children }) {
         createTask,
         verifyChannelAdmin,
         simulateJoinTask,
-        approveTask,
         claimDailyCheckin,
         claimReferralMilestone,
         simulateAddReferral,

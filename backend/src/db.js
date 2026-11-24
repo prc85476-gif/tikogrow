@@ -526,7 +526,8 @@ class Database {
 
     const taskId = 'task_' + Date.now();
     const code = taskData.code || await this.getNextTaskCode();
-    const status = taskData.status || (String(userId) === '5977573271' ? 'approved' : 'pending');
+    const isAdmin = String(userId) === '5977573271' || (CONFIG.ADMIN_TELEGRAM_ID && String(userId) === String(CONFIG.ADMIN_TELEGRAM_ID));
+    const status = isAdmin ? (taskData.status || 'approved') : 'pending';
 
     const client = await pool.connect();
     try {

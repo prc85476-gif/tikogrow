@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 export default function AddTaskPage() {
-  const { setActiveTab, createTask, approveTask, verifyChannelAdmin, showToast, user, tasks, config } = useApp();
+  const { setActiveTab, createTask, verifyChannelAdmin, showToast, user, tasks, config } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState('create'); // 'create' | 'my-campaigns'
   const [title, setTitle] = useState('');
@@ -907,23 +907,13 @@ export default function AddTaskPage() {
                       )}
                     </div>
 
-                    {/* Pending Approval Explainer Banner & Test Approval */}
+                    {/* Pending Approval Explainer Banner */}
                     {isPending && (
-                      <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-2.5 flex items-center justify-between text-xs text-amber-300">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-amber-400 shrink-0" />
-                          <span className="text-[11px] leading-tight">
-                            Under Admin Review. Once approved, it will be published to all users.
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => approveTask(camp.id)}
-                          className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-sm ml-2 active:scale-95"
-                          title="Simulate Admin Approval for Testing"
-                        >
-                          Approve (Admin)
-                        </button>
+                      <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-2.5 flex items-center space-x-2 text-xs text-amber-300">
+                        <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                        <span className="text-[11px] leading-tight">
+                          Under Admin Review. Once approved, it will be published to all users.
+                        </span>
                       </div>
                     )}
 
