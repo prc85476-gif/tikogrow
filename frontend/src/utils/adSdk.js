@@ -5,11 +5,24 @@
 
 export function playGigaAd() {
   return new Promise((resolve, reject) => {
+    const triggerAd = () => {
+      try {
+        const res = window.showGiga();
+        if (res && typeof res.then === 'function') {
+          res
+            .then(() => resolve({ success: true }))
+            .catch((err) => reject(err || new Error('Ad was closed or skipped before completion.')));
+        } else {
+          resolve({ success: true });
+        }
+      } catch (err) {
+        reject(err || new Error('Failed to launch GigaPub Ad.'));
+      }
+    };
+
     // 1. If window.showGiga is already ready
     if (typeof window !== 'undefined' && typeof window.showGiga === 'function') {
-      window.showGiga()
-        .then(() => resolve({ success: true }))
-        .catch((err) => reject(err || new Error('Ad was closed or skipped before completion.')));
+      triggerAd();
       return;
     }
 
@@ -27,9 +40,7 @@ export function playGigaAd() {
       attempts++;
       if (typeof window !== 'undefined' && typeof window.showGiga === 'function') {
         clearInterval(interval);
-        window.showGiga()
-          .then(() => resolve({ success: true }))
-          .catch((err) => reject(err || new Error('Ad was closed or skipped before completion.')));
+        triggerAd();
       } else if (attempts > 35) {
         clearInterval(interval);
         reject(new Error('GigaPub Ad SDK is not available. Please check your network or disable ad blockers.'));

@@ -472,12 +472,16 @@ export function AppProvider({ children }) {
   const adminCreateTask = async (newTaskData) => {
     // Auto-normalize link format (e.g. @channel or t.me/channel -> https://t.me/channel)
     let formattedLink = newTaskData.link?.trim() || '';
-    if (formattedLink.startsWith('@')) {
-      formattedLink = 'https://t.me/' + formattedLink.slice(1);
-    } else if (formattedLink.startsWith('t.me/')) {
-      formattedLink = 'https://' + formattedLink;
-    } else if (formattedLink && !formattedLink.startsWith('http://') && !formattedLink.startsWith('https://')) {
-      formattedLink = 'https://' + formattedLink;
+    if (newTaskData.category === 'ads') {
+      formattedLink = '';
+    } else if (formattedLink) {
+      if (formattedLink.startsWith('@')) {
+        formattedLink = 'https://t.me/' + formattedLink.slice(1);
+      } else if (formattedLink.startsWith('t.me/')) {
+        formattedLink = 'https://' + formattedLink;
+      } else if (!formattedLink.startsWith('http://') && !formattedLink.startsWith('https://')) {
+        formattedLink = 'https://' + formattedLink;
+      }
     }
     const payload = { ...newTaskData, link: formattedLink };
 

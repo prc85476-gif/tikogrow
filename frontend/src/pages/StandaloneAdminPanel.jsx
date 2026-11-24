@@ -474,7 +474,7 @@ export default function StandaloneAdminPanel() {
     setEditingTaskId(null);
     setTaskForm({
       title: '',
-      category: 'telegram',
+      category: 'ads',
       link: '',
       usdtReward: 0.015,
       fgReward: 15,
@@ -490,7 +490,7 @@ export default function StandaloneAdminPanel() {
     setEditingTaskId(task.id);
     setTaskForm({
       title: task.title || '',
-      category: task.category || 'telegram',
+      category: task.category || 'ads',
       link: task.link || '',
       usdtReward: task.usdtReward !== undefined ? task.usdtReward : 0.015,
       fgReward: task.fgReward !== undefined ? task.fgReward : 15,
@@ -512,13 +512,23 @@ export default function StandaloneAdminPanel() {
       return;
     }
 
+    const isAdsTask = taskForm.category === 'ads';
+    if (!isAdsTask && !taskForm.link?.trim()) {
+      showToast('Please enter a target link', 'error');
+      return;
+    }
+
     setIsSubmittingTask(true);
     try {
+      const payload = {
+        ...taskForm,
+        link: isAdsTask ? '' : (taskForm.link?.trim() || '')
+      };
       if (editingTaskId) {
-        await adminEditTask(editingTaskId, taskForm);
+        await adminEditTask(editingTaskId, payload);
         setIsTaskModalOpen(false);
       } else {
-        const created = await adminCreateTask(taskForm);
+        const created = await adminCreateTask(payload);
         if (created) {
           setIsTaskModalOpen(false);
         }
@@ -1388,9 +1398,9 @@ export default function StandaloneAdminPanel() {
                   <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar">
                     {[
                       { id: 'ALL', label: 'All Tasks' },
+                      { id: 'ads', label: '🎬 GigaPub Ads' },
                       { id: 'telegram', label: 'Telegram' },
-                      { id: 'twitter', label: 'Twitter (X)' },
-                      { id: 'ads', label: 'Google Ads' }
+                      { id: 'twitter', label: 'Twitter (X)' }
                     ].map((cat) => (
                       <button
                         key={cat.id}
@@ -1497,7 +1507,7 @@ export default function StandaloneAdminPanel() {
                               </div>
 
                               <p className="text-[11px] text-gray-400 font-mono truncate mt-0.5">
-                                {t.link || 'Internal task'}
+                                {t.category === 'ads' ? '🎬 GigaPub Video Ad' : (t.link || 'Internal task')}
                               </p>
                             </div>
                           </div>
@@ -3072,16 +3082,23 @@ export default function StandaloneAdminPanel() {
             <form onSubmit={handleSaveTask} className="space-y-4">
               <div>
                 <label className="text-xs font-black uppercase text-gray-400 block mb-1.5">
-                  Platform Category
+                  Platform / Task Type
                 </label>
                 <select
                   value={taskForm.category}
-                  onChange={(e) => setTaskForm({ ...taskForm, category: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-white outline-none"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTaskForm((prev) => ({
+                      ...prev,
+                      category: val,
+                      link: val === 'ads' ? '' : prev.link
+                    }));
+                  }}
+                  className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-white outline-none font-bold"
                 >
+                  <option value="ads">🎬 GigaPub Ads Task (No Link Required)</option>
                   <option value="telegram">Telegram Channel/Group</option>
                   <option value="twitter">Twitter (X) Follow/Repost</option>
-                  <option value="ads">Google Sponsor Ad</option>
                   <option value="youtube">YouTube Subscribe</option>
                   <option value="website">External Website</option>
                 </select>
@@ -3095,25 +3112,37 @@ export default function StandaloneAdminPanel() {
                   type="text"
                   value={taskForm.title}
                   onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
-                  placeholder="e.g. Join Official Announcement Channel"
+                  placeholder={taskForm.category === 'ads' ? "e.g. Watch Sponsor Video Ad & Earn USDT" : "e.g. Join Official Announcement Channel"}
                   className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-white outline-none"
                   required
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-black uppercase text-gray-400 block mb-1.5">
-                  Target Link / URL (e.g. https://... or t.me/... or @username)
-                </label>
-                <input
-                  type="text"
-                  value={taskForm.link}
-                  onChange={(e) => setTaskForm({ ...taskForm, link: e.target.value })}
-                  placeholder="https://t.me/your_channel or @your_channel"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-white outline-none font-mono"
-                  required
-                />
-              </div>
+              {taskForm.category === 'ads' ? (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-1.5">
+                  <div className="flex items-center space-x-2 font-black text-amber-400">
+                    <span className="text-base">🎬</span>
+                    <span>GigaPub Ads Task (Zero Link Required)</span>
+                  </div>
+                  <p className="text-[11px] text-gray-300 leading-relaxed">
+                    কোনো লিংক দিতে হবে না। ব্যবহারকারীরা টাস্কে ক্লিক করলে সরাসরি <strong>GigaPub Video Ad</strong> চালু হবে এবং দেখার পর রিওয়ার্ড পাবে।
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-black uppercase text-gray-400 block mb-1.5">
+                    Target Link / URL (e.g. https://... or t.me/... or @username)
+                  </label>
+                  <input
+                    type="text"
+                    value={taskForm.link}
+                    onChange={(e) => setTaskForm({ ...taskForm, link: e.target.value })}
+                    placeholder="https://t.me/your_channel or @your_channel"
+                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-white outline-none font-mono"
+                    required={taskForm.category !== 'ads'}
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

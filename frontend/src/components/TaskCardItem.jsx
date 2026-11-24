@@ -9,7 +9,6 @@ export default function TaskCardItem({ task }) {
   const [isJoinedClicked, setIsJoinedClicked] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isPlayingAd, setIsPlayingAd] = useState(false);
-  const [adStep, setAdStep] = useState(1); // Step 1: Watch ad -> Prompt click; Step 2: Watch & Claim
 
   const isTelegram = task.category === 'telegram' || task.type === 'telegram';
   const isAd =
@@ -18,7 +17,8 @@ export default function TaskCardItem({ task }) {
     task.type === 'ads' ||
     task.id?.startsWith('task_ad_') ||
     task.title?.toLowerCase().includes('video ad') ||
-    task.title?.toLowerCase().includes('sponsor ad');
+    task.title?.toLowerCase().includes('sponsor ad') ||
+    task.title?.toLowerCase().includes('gigapub');
 
   // Dynamic Badge Calculation:
   // If task has explicit badge override ('new' or 'limited'), honor it.
@@ -31,29 +31,18 @@ export default function TaskCardItem({ task }) {
   const handleAction = async () => {
     if (task.completed || isVerifying || isPlayingAd) return;
 
-    // 1. Rewarded Ad Task with GigaPub SDK (2-Step Flow: View -> Click prompt -> Claim)
+    // 1. Rewarded Ad Task with GigaPub SDK (Watch Ad -> Verified -> Complete & Credit)
     if (isAd) {
       setIsPlayingAd(true);
       try {
         await playGigaAd();
-        if (adStep === 1) {
-          setAdStep(2);
-          showToast('Please click on the ad to visit sponsor, then tap CLAIM to receive reward! 👆', 'info');
-        } else {
-          showToast('Ad verified! Claiming your reward... 🎉', 'success');
-          await completeTask(task);
-          setAdStep(1);
-        }
+        showToast('Ad completed! Claiming your reward... 🎉', 'success');
+        await completeTask(task);
       } catch (err) {
-        console.warn('GigaPub Ad error/skipped:', err);
-        if (adStep === 1) {
-          setAdStep(2);
-          showToast('Tap CLAIM to receive your reward! 👆', 'info');
-        } else {
-          showToast('Ad verified! Claiming your reward... 🎉', 'success');
-          await completeTask(task);
-          setAdStep(1);
-        }
+        console.warn('GigaPub Ad status/warning:', err);
+        // Even if skipped/closed or blocked by adblocker, credit reward to user
+        showToast('Ad completed! Claiming your reward... 🎉', 'success');
+        await completeTask(task);
       } finally {
         setIsPlayingAd(false);
       }
@@ -207,7 +196,7 @@ export default function TaskCardItem({ task }) {
               ? 'bg-gray-800 text-[#00DF8F] border border-[#00DF8F]/30 cursor-default flex items-center space-x-1'
               : isPlayingAd
               ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : (isTelegram && isJoinedClicked) || (isAd && adStep === 2)
+              : isTelegram && isJoinedClicked
               ? 'bg-[#00DF8F] hover:bg-[#00DF8F]/90 text-black shadow-lg shadow-[#00DF8F]/20 active:scale-95'
               : 'btn-orange-3d shadow-md'
           }`}
@@ -229,8 +218,6 @@ export default function TaskCardItem({ task }) {
             </span>
           ) : isTelegram ? (
             isJoinedClicked ? 'CHECK' : 'START'
-          ) : isAd ? (
-            adStep === 2 ? 'CLAIM' : 'START'
           ) : (
             'START'
           )}
